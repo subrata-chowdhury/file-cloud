@@ -3,126 +3,215 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
-import { FiUploadCloud, FiX } from 'react-icons/fi';
+import { FiUploadCloud, FiX, FiCheckCircle } from 'react-icons/fi';
 
 interface UploadManagerProps {
   onUploadComplete: () => void;
+  folderId?: string | null;
 }
 
-export default function UploadManager({ onUploadComplete }: UploadManagerProps) {
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [error, setError] = useState('');
+interface UploadTask {
+  id: string;
+  file: File;
+  progress: number;
+  error: string;
+  status: 'uploading' | 'completed' | 'error';
+}
+
+export default function UploadManager({ onUploadComplete, folderId }: UploadManagerProps) {
+  const [tasks, setTasks] = useState<UploadTask[]>([]);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0];
-      if (!file) return;
+      if (acceptedFiles.length === 0) return;
 
-      setUploading(true);
-      setProgress(0);
-      setError('');
+      // Initialize tasks for all dropped files
+      const newTasks: UploadTask[] = acceptedFiles.map((file) => ({
+        id: Math.random().toString(36).substring(7),
+        file,
+        progress: 0,
+        error: '',
+        status: 'uploading',
+      }));
+
+      setTasks((prev) => [...newTasks, ...prev]);
+
+      // Helper to update a specific task
+      const updateTask = (id: string, updates: Partial<UploadTask>) => {
+        setTasks((prev) => {
+          const next = prev.map((task) => (task.id === id ? { ...task, ...updates } : task));
+
+          if (updates.status === 'completed' || updates.status === 'error') {
+            setTimeout(() => {
+              setTasks((current) => current.filter((t) => t.id !== id));
+            }, 5000);
+          }
+
+          return next;
+        });
+      };
 
       try {
-        // 1. Get Signature from backend
+        // 1. Get Signature from backend once for all files (reusable if within timeframe, but safest to fetch fresh or reuse if recent)
+        // We'll fetch it per file to avoid edge cases, or just fetch once and reuse. Fetching once is faster.
         const sigRes = await fetch('/api/upload/signature');
         if (!sigRes.ok) throw new Error('Failed to get upload signature');
         const sigData = await sigRes.json();
 
-        // 2. Upload to Cloudinary with Axios for progress
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('api_key', sigData.apiKey);
-        formData.append('timestamp', sigData.timestamp.toString());
-        formData.append('signature', sigData.signature);
-        formData.append('folder', sigData.folder);
+        // Process all files concurrently
+        await Promise.all(
+          newTasks.map(async (task) => {
+            try {
+              const formData = new FormData();
+              formData.append('file', task.file);
+              formData.append('api_key', sigData.apiKey);
+              formData.append('timestamp', sigData.timestamp.toString());
+              formData.append('signature', sigData.signature);
+              formData.append('folder', sigData.folder);
 
-        const uploadRes = await axios.post(
-          `https://api.cloudinary.com/v1_1/${sigData.cloudName}/auto/upload`,
-          formData,
-          {
-            onUploadProgress: (progressEvent) => {
-              const percentCompleted = Math.round(
-                (progressEvent.loaded * 100) / (progressEvent.total || file.size)
+              const uploadRes = await axios.post(
+                `https://api.cloudinary.com/v1_1/${sigData.cloudName}/auto/upload`,
+                formData,
+                {
+                  onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round(
+                      (progressEvent.loaded * 100) / (progressEvent.total || task.file.size)
+                    );
+                    updateTask(task.id, { progress: percentCompleted });
+                  },
+                }
               );
-              setProgress(percentCompleted);
-            },
-          }
+
+              const uploadedFile = uploadRes.data;
+
+              // Save metadata to DB
+              const saveRes = await fetch('/api/files', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  name: task.file.name,
+                  url: uploadedFile.secure_url,
+                  publicId: uploadedFile.public_id,
+                  size: uploadedFile.bytes,
+                  mimeType:
+                    uploadedFile.resource_type === 'image'
+                      ? task.file.type
+                      : uploadedFile.format || task.file.type,
+                  folderId: folderId || null,
+                }),
+              });
+
+              if (!saveRes.ok) throw new Error('Failed to save file metadata');
+
+              updateTask(task.id, { status: 'completed', progress: 100 });
+            } catch (err: unknown) {
+              const errorMessage = err instanceof Error ? err.message : 'Upload failed';
+              updateTask(task.id, { status: 'error', error: errorMessage });
+            }
+          })
         );
 
-        const uploadedFile = uploadRes.data;
-
-        // 3. Save metadata to DB
-        const saveRes = await fetch('/api/files', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: file.name,
-            url: uploadedFile.secure_url,
-            publicId: uploadedFile.public_id,
-            size: uploadedFile.bytes,
-            mimeType:
-              uploadedFile.resource_type === 'image' ? file.type : uploadedFile.format || file.type,
-          }),
-        });
-
-        if (!saveRes.ok) throw new Error('Failed to save file metadata');
-
+        // Notify parent that new files are available
         onUploadComplete();
-      } catch (err: unknown) {
-        console.error(err);
-        const errorMessage = err instanceof Error ? err.message : 'An error occurred during upload';
-        setError(errorMessage);
-      } finally {
-        setUploading(false);
-        setProgress(0);
+      } catch (err) {
+        console.error('Failed to initiate uploads:', err);
       }
     },
     [onUploadComplete]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, multiple: false });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: true,
+  });
+
+  const removeTask = (id: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  };
 
   return (
     <div className="w-full">
       <div
         {...getRootProps()}
-        className={`group cursor-pointer rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-200 ${isDragActive ? 'scale-[1.02] border-blue-500 bg-blue-50' : 'border-gray-300 bg-white shadow-sm hover:border-blue-400 hover:bg-blue-50/30'}`}
+        className={`group cursor-pointer rounded-2xl border-2 border-dashed px-6 py-8 transition-all duration-200 ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white shadow-sm hover:border-blue-400 hover:bg-blue-50/30'}`}
       >
         <input {...getInputProps()} />
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 transition-colors group-hover:bg-blue-100">
-          <FiUploadCloud className="h-8 w-8 text-blue-600" />
+        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50 transition-colors group-hover:bg-blue-100">
+            <FiUploadCloud className="h-6 w-6 text-blue-600" />
+          </div>
+          <div className="text-center sm:text-left">
+            <p className="text-base font-semibold text-gray-900">
+              {isDragActive ? 'Drop files here!' : 'Click or drag and drop to upload'}
+            </p>
+            <p className="mt-1 text-sm text-gray-500">
+              Support for high-res images, videos, and large archives. Any size supported.
+            </p>
+          </div>
+          <div className="hidden sm:ml-auto sm:block">
+            <span className="rounded-full bg-gray-900 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all group-hover:bg-gray-800">
+              Browse Files
+            </span>
+          </div>
         </div>
-        <p className="mt-2 text-sm font-medium text-gray-900">
-          {isDragActive ? "Drop it like it's hot!" : 'Click to upload or drag and drop'}
-        </p>
-        <p className="mt-1 text-xs text-gray-500">SVG, PNG, JPG, ZIP, MP4 (Any size)</p>
       </div>
 
-      {uploading && (
-        <div className="mt-6 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-          <div className="mb-2 flex justify-between text-sm font-medium">
-            <span className="flex items-center gap-2 text-gray-700">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></span>
-              Uploading...
-            </span>
-            <span className="text-blue-600">{progress}%</span>
+      {tasks.length > 0 && (
+        <div className="fixed right-6 bottom-6 z-50 flex max-h-[400px] w-80 flex-col gap-3 overflow-y-auto rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl">
+          <div className="flex items-center justify-between border-b border-gray-50 pb-2">
+            <h3 className="text-sm font-semibold text-gray-900">
+              Uploading {tasks.filter((t) => t.status === 'uploading').length} files
+            </h3>
+            <button
+              onClick={() => setTasks([])}
+              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            >
+              <FiX className="h-4 w-4" />
+            </button>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+          {tasks.map((task) => (
             <div
-              className="h-2 rounded-full bg-blue-600 transition-all duration-300 ease-out"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-        </div>
-      )}
+              key={task.id}
+              className="rounded-xl border border-gray-50 bg-gray-50/50 p-3 shadow-sm transition-all"
+            >
+              <div className="mb-2 flex items-center justify-between text-sm font-medium">
+                <span className="flex items-center gap-2 truncate text-gray-700">
+                  {task.status === 'uploading' && (
+                    <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-blue-500"></span>
+                  )}
+                  {task.status === 'completed' && (
+                    <FiCheckCircle className="shrink-0 text-green-500" />
+                  )}
+                  {task.status === 'error' && <FiX className="shrink-0 text-red-500" />}
+                  <span className="max-w-[150px] truncate">{task.file.name}</span>
+                </span>
 
-      {error && (
-        <div className="mt-4 flex items-center justify-between rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          <span>{error}</span>
-          <button onClick={() => setError('')}>
-            <FiX size={16} />
-          </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  {task.status === 'uploading' && (
+                    <span className="text-xs font-bold text-blue-600">{task.progress}%</span>
+                  )}
+                  {task.status === 'error' && <span className="text-xs text-red-500">Failed</span>}
+                  {(task.status === 'completed' || task.status === 'error') && (
+                    <button
+                      onClick={() => removeTask(task.id)}
+                      className="text-gray-400 transition-colors hover:text-gray-600"
+                    >
+                      <FiX size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {task.status === 'uploading' && (
+                <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-gray-200">
+                  <div
+                    className="h-1 rounded-full bg-blue-600 transition-all duration-300 ease-out"
+                    style={{ width: `${task.progress}%` }}
+                  ></div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

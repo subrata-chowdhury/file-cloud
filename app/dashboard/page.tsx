@@ -2,13 +2,13 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardNav from './components/DashboardNav';
 import EmptyState from './components/EmptyState';
 import UploadManager from './components/UploadManager';
 import FileCard from './components/FileCard';
 import CustomSelect from './components/CustomSelect';
 import Pagination from './components/Pagination';
-import { FiLoader, FiSearch, FiFilter } from 'react-icons/fi';
+import FolderCard from './components/FolderCard';
+import { FiLoader, FiFilter, FiFolderPlus, FiChevronRight, FiHome, FiX } from 'react-icons/fi';
 
 interface StoredFile {
   id: string;
@@ -20,29 +20,55 @@ interface StoredFile {
   createdAt: string;
 }
 
+interface Folder {
+  id: string;
+  name: string;
+  parentId: string | null;
+  createdAt: string;
+}
+
 export default function Dashboard() {
   const [files, setFiles] = useState<StoredFile[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [breadcrumbs, setBreadcrumbs] = useState<{ id: string; name: string }[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
 
   // Filters
-  const [search, setSearch] = useState('');
-  const [searchInput, setSearchInput] = useState(''); // for the input field before pressing enter/debouncing
   const [type, setType] = useState('all');
   const [privacy, setPrivacy] = useState('all');
 
+  const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+
   const router = useRouter();
+
+  const fetchFolders = useCallback(async () => {
+    try {
+      const url = currentFolderId ? `/api/folders?parentId=${currentFolderId}` : '/api/folders';
+      const res = await fetch(url);
+      if (res.ok) {
+        setFolders(await res.json());
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [currentFolderId]);
 
   const fetchFiles = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
         page: pagination.page.toString(),
-        limit: '6', // Adjust limit as needed
-        search,
+        limit: '12',
         type,
         privacy,
       });
+      if (currentFolderId) {
+        params.append('folderId', currentFolderId);
+      }
 
       const res = await fetch(`/api/files?${params.toString()}`);
       if (res.ok) {
@@ -57,24 +83,60 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, search, type, privacy, router]);
+  }, [pagination.page, type, privacy, currentFolderId, router]);
 
   useEffect(() => {
+    fetchFolders();
     fetchFiles();
-  }, [fetchFiles]);
+  }, [fetchFolders, fetchFiles]);
 
-  // Debounce search input
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setSearch(searchInput);
-      setPagination((p) => ({ ...p, page: 1 })); // Reset to page 1 on search
-    }, 500);
-    return () => clearTimeout(handler);
-  }, [searchInput]);
+  const handleCreateFolder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFolderName.trim()) return;
 
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = '/';
+    try {
+      const res = await fetch('/api/folders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newFolderName, parentId: currentFolderId }),
+      });
+      if (res.ok) {
+        setNewFolderName('');
+        setIsNewFolderModalOpen(false);
+        fetchFolders();
+      }
+    } catch (err) {
+      console.error('Failed to create folder:', err);
+    }
+  };
+
+  const handleDeleteFolder = async (id: string) => {
+    try {
+      const res = await fetch(`/api/folders/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchFolders();
+      }
+    } catch (err) {
+      console.error('Failed to delete folder:', err);
+    }
+  };
+
+  const handleNavigateFolder = (folder: Folder) => {
+    setCurrentFolderId(folder.id);
+    setBreadcrumbs([...breadcrumbs, { id: folder.id, name: folder.name }]);
+    setPagination((p) => ({ ...p, page: 1 }));
+  };
+
+  const handleNavigateBreadcrumb = (index: number) => {
+    if (index === -1) {
+      setCurrentFolderId(null);
+      setBreadcrumbs([]);
+    } else {
+      const newBreadcrumbs = breadcrumbs.slice(0, index + 1);
+      setCurrentFolderId(newBreadcrumbs[newBreadcrumbs.length - 1].id);
+      setBreadcrumbs(newBreadcrumbs);
+    }
+    setPagination((p) => ({ ...p, page: 1 }));
   };
 
   const handleDelete = async (id: string) => {
@@ -138,50 +200,52 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
-      <DashboardNav onLogout={handleLogout} />
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="space-y-8">
+        {/* Upload Section */}
+        <section>
+          <UploadManager
+            folderId={currentFolderId}
+            onUploadComplete={() => {
+              setPagination((p) => ({ ...p, page: 1 }));
+              fetchFiles();
+            }}
+          />
+        </section>
 
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-12 lg:flex-row">
-          {/* Upload Section */}
-          <div className="w-full shrink-0 lg:w-1/3">
-            <div className="sticky top-24">
-              <h2 className="font-display mb-6 text-xl font-semibold text-gray-900">
-                Upload Files
-              </h2>
-              <UploadManager
-                onUploadComplete={() => {
-                  setPagination((p) => ({ ...p, page: 1 }));
-                  fetchFiles();
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Files List Section */}
-          <div className="w-full lg:w-2/3">
-            <h2 className="font-display mb-6 flex items-center justify-between text-xl font-semibold text-gray-900">
+        {/* Files & Folders List Section */}
+        <section>
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="font-display flex items-center gap-3 text-xl font-semibold text-gray-900">
               Your Files
-              <span className="rounded-full border border-gray-200 bg-white px-3 py-1 text-sm font-medium text-gray-500">
-                {pagination.total} items
-              </span>
             </h2>
 
-            {/* Filters Bar */}
-            <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:flex-row">
-              <div className="relative flex-1">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <FiSearch className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search files..."
-                  className="block w-full rounded-xl border border-gray-200 py-2.5 pr-3 pl-10 text-gray-900 transition-colors focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                />
-              </div>
-              <div className="flex w-full gap-4 sm:w-auto">
+            {/* Actions & Filters */}
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setIsNewFolderModalOpen(true)}
+                className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+              >
+                <FiFolderPlus className="h-4 w-4" />
+                New Folder
+              </button>
+
+              <div className="hidden h-6 w-px bg-gray-200 sm:block"></div>
+
+              <div className="flex gap-2">
+                {(type !== 'all' || privacy !== 'all') && (
+                  <button
+                    onClick={() => {
+                      setType('all');
+                      setPrivacy('all');
+                      setPagination((p) => ({ ...p, page: 1 }));
+                    }}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-900 focus:ring-2 focus:ring-gray-500/20 focus:outline-none"
+                    title="Reset Filters"
+                  >
+                    <FiX className="h-4 w-4" />
+                  </button>
+                )}
                 <CustomSelect
                   value={type}
                   onChange={(v) => {
@@ -201,39 +265,144 @@ export default function Dashboard() {
                 />
               </div>
             </div>
+          </div>
 
-            {loading ? (
-              <div className="flex flex-col items-center justify-center space-y-4 py-20">
-                <FiLoader className="h-8 w-8 animate-spin text-blue-600" />
-                <p className="animate-pulse text-sm font-medium text-gray-500">
-                  Loading your storage...
-                </p>
+          {/* Breadcrumbs */}
+          <nav className="mb-6 flex items-center gap-2 text-sm text-gray-500">
+            <button
+              onClick={() => handleNavigateBreadcrumb(-1)}
+              className={`flex items-center gap-1 transition-colors hover:text-blue-600 ${currentFolderId === null ? 'font-semibold text-gray-900' : ''}`}
+            >
+              <FiHome className="h-4 w-4" />
+              <span>Root</span>
+            </button>
+            {breadcrumbs.map((crumb, idx) => (
+              <div key={crumb.id} className="flex items-center gap-2">
+                <FiChevronRight className="h-4 w-4 text-gray-400" />
+                <button
+                  onClick={() => handleNavigateBreadcrumb(idx)}
+                  className={`transition-colors hover:text-blue-600 ${idx === breadcrumbs.length - 1 ? 'font-semibold text-gray-900' : ''}`}
+                >
+                  {crumb.name}
+                </button>
               </div>
-            ) : files.length === 0 ? (
-              <EmptyState />
-            ) : (
-              <>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  {files.map((file) => (
-                    <FileCard
-                      key={file.id}
-                      file={file}
-                      onDelete={handleDelete}
-                      onTogglePrivacy={handleTogglePrivacy}
-                      onRename={handleRename}
-                    />
-                  ))}
-                </div>
+            ))}
+          </nav>
+
+          {/* Folders Grid */}
+          {folders.length > 0 && (
+            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {folders.map((folder) => (
+                <FolderCard
+                  key={folder.name}
+                  folder={folder}
+                  onClick={() => handleNavigateFolder(folder)}
+                  onDelete={handleDeleteFolder}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Files Grid */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center space-y-4 py-32">
+              <FiLoader className="h-8 w-8 animate-spin text-blue-600" />
+              <p className="animate-pulse text-sm font-medium text-gray-500">
+                Loading your storage...
+              </p>
+            </div>
+          ) : files.length === 0 && folders.length === 0 ? (
+            <EmptyState
+              hasFilters={type !== 'all' || privacy !== 'all'}
+              onNewFolder={() => setIsNewFolderModalOpen(true)}
+              onResetFilters={() => {
+                setType('all');
+                setPrivacy('all');
+                setPagination((p) => ({ ...p, page: 1 }));
+              }}
+            />
+          ) : files.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {files.map((file) => (
+                  <FileCard
+                    key={file.id}
+                    file={file}
+                    onDelete={handleDelete}
+                    onTogglePrivacy={handleTogglePrivacy}
+                    onRename={handleRename}
+                  />
+                ))}
+              </div>
+              <div className="mt-8">
                 <Pagination
                   currentPage={pagination.page}
                   totalPages={pagination.totalPages}
                   onPageChange={(page) => setPagination((p) => ({ ...p, page }))}
                 />
-              </>
-            )}
+              </div>
+            </>
+          ) : (
+            <div className="py-12 text-center text-gray-500">
+              {type !== 'all' || privacy !== 'all'
+                ? 'No files matching your filters.'
+                : 'No files in this folder yet.'}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* New Folder Modal */}
+      {isNewFolderModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Create New Folder</h3>
+              <button
+                onClick={() => setIsNewFolderModalOpen(false)}
+                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+              >
+                <FiX className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleCreateFolder}>
+              <div className="mb-6">
+                <label
+                  htmlFor="folderName"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  Folder Name
+                </label>
+                <input
+                  type="text"
+                  id="folderName"
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  className="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                  placeholder="e.g. Work Documents"
+                  autoFocus
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsNewFolderModalOpen(false)}
+                  className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!newFolderName.trim()}
+                  className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
+                >
+                  Create Folder
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-      </main>
-    </div>
+      )}
+    </main>
   );
 }

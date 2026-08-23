@@ -57,6 +57,11 @@ export default function FileCard({ file, onDelete, onTogglePrivacy, onRename }: 
   const isImage = file.mimeType.startsWith('image/');
   const isVideo = file.mimeType.startsWith('video/');
 
+  const getThumbnailUrl = (url: string) => {
+    if (!url.includes('/upload/')) return url;
+    return url.replace('/upload/', '/upload/w_200,h_200,c_fill,q_auto,f_auto/');
+  };
+
   const formatSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -101,9 +106,13 @@ export default function FileCard({ file, onDelete, onTogglePrivacy, onRename }: 
         }}
       >
         <div className="mt-1 flex-shrink-0">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-gray-100 bg-gray-50 transition-colors group-hover:bg-blue-50">
+          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-gray-50 transition-colors group-hover:bg-blue-50">
             {isImage ? (
-              <FiImage className="h-6 w-6 text-blue-500" />
+              <img
+                src={getThumbnailUrl(file.url)}
+                alt={file.name}
+                className="h-full w-full object-cover"
+              />
             ) : isVideo ? (
               <FiVideo className="h-6 w-6 text-purple-500" />
             ) : (
@@ -178,7 +187,7 @@ export default function FileCard({ file, onDelete, onTogglePrivacy, onRename }: 
       <div className="absolute top-4 right-4" ref={menuRef}>
         <button
           onClick={() => setShowMenu(!showMenu)}
-          className="rounded-lg p-1.5 text-gray-400 opacity-0 transition-colors group-hover:opacity-100 hover:bg-gray-100 hover:text-gray-700 focus:opacity-100"
+          className="rounded-lg p-1.5 text-gray-400 opacity-50 transition-colors group-hover:opacity-100 hover:bg-gray-100 hover:text-gray-700 focus:opacity-100"
         >
           <FiMoreVertical size={18} />
         </button>
