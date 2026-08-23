@@ -30,5 +30,12 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/dashboard/:path*', '/login', '/register', '/api/files/:path*', '/api/upload/:path*'],
+  matcher: [
+    '/',
+    '/dashboard/:path*',
+    '/login',
+    '/register',
+    '/api/files/:path*',
+    '/api/upload/:path*',
+  ],
 };

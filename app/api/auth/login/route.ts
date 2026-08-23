@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { signToken } from '@/lib/auth';
+import { randomUUID } from 'crypto';
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,6 +23,24 @@ export async function POST(req: NextRequest) {
     if (!isPasswordValid) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
+
+    const notificationId = randomUUID();
+    const loginTime = new Date().toLocaleTimeString();
+
+    // Create a security notification on login
+    await query(
+      `INSERT INTO "Notification" (id, "userId", title, message, type, severity, "isRead")
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [
+        notificationId,
+        user.id,
+        'New Login Detected',
+        `A new login to your account was detected at ${loginTime}.`,
+        'Security',
+        'high',
+        false,
+      ]
+    );
 
     const token = signToken(user.id);
 

@@ -16,10 +16,20 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('search') || '';
     const type = searchParams.get('type') || 'all';
     const privacy = searchParams.get('privacy') || 'all';
+    const folderId = searchParams.get('folderId');
 
     const conditions: string[] = ['"ownerId" = $1'];
     const params: unknown[] = [userId];
     let paramIndex = 2;
+
+    if (folderId) {
+      conditions.push(`"folderId" = $${paramIndex}`);
+      params.push(folderId);
+      paramIndex++;
+    } else if (!search) {
+      // Only restrict to root if not searching globally
+      conditions.push(`"folderId" IS NULL`);
+    }
 
     if (search) {
       conditions.push(`name ILIKE $${paramIndex}`);
@@ -81,7 +91,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, url, publicId, size, mimeType } = await req.json();
+    const { name, url, publicId, size, mimeType, folderId } = await req.json();
 
     if (!name || !url || !publicId || size === undefined || !mimeType) {
       return NextResponse.json({ error: 'Missing required file fields' }, { status: 400 });
@@ -89,9 +99,9 @@ export async function POST(req: NextRequest) {
 
     const id = randomUUID();
     const { rows } = await query(
-      `INSERT INTO "File" (id, name, url, "publicId", size, "mimeType", "isPublic", "ownerId", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, true, $7, NOW(), NOW()) RETURNING *`,
-      [id, name, url, publicId, size, mimeType, userId]
+      `INSERT INTO "File" (id, name, url, "publicId", size, "mimeType", "isPublic", "ownerId", "folderId", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, true, $7, $8, NOW(), NOW()) RETURNING *`,
+      [id, name, url, publicId, size, mimeType, userId, folderId || null]
     );
 
     return NextResponse.json(rows[0], { status: 201 });
