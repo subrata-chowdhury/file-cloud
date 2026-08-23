@@ -15,8 +15,12 @@ export default function UserProfileDropdown() {
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        profileRef.current &&
+        event.target instanceof Node &&
+        !profileRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     };

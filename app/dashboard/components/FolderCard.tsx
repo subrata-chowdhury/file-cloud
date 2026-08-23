@@ -23,7 +23,11 @@ export default function FolderCard({ folder, onClick, onDelete }: FolderCardProp
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (
+        menuRef.current &&
+        e.target instanceof Node &&
+        !menuRef.current.contains(e.target)
+      ) {
         setShowMenu(false);
       }
     };

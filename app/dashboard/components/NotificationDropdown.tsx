@@ -19,8 +19,12 @@ export default function NotificationDropdown() {
   const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        notifRef.current &&
+        event.target instanceof Node &&
+        !notifRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     };
