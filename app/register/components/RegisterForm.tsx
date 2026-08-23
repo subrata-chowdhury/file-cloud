@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FiLoader, FiUser, FiMail, FiLock } from 'react-icons/fi';
+import { FiLoader, FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
 export default function RegisterForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -87,13 +88,20 @@ export default function RegisterForm() {
               <FiLock className="h-5 w-5 text-gray-400" />
             </div>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               required
-              className="block w-full rounded-lg border border-gray-300 py-2.5 pr-3 pl-10 text-gray-900 transition-colors focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="block w-full rounded-lg border border-gray-300 py-2.5 pr-10 pl-10 text-gray-900 transition-colors focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+            </button>
           </div>
         </div>
 
