@@ -74,7 +74,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/');
+    window.location.href = '/';
   };
 
   const handleDelete = async (id: string) => {
