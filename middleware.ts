@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
 
+  const isLandingPage = request.nextUrl.pathname === '/';
   const isAuthPage =
     request.nextUrl.pathname.startsWith('/login') ||
     request.nextUrl.pathname.startsWith('/register');
@@ -20,7 +21,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
   } else {
-    if (isAuthPage) {
+    if (isAuthPage || isLandingPage) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
@@ -29,5 +30,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/register', '/api/files/:path*', '/api/upload/:path*'],
+  matcher: ['/', '/dashboard/:path*', '/login', '/register', '/api/files/:path*', '/api/upload/:path*'],
 };
