@@ -133,10 +133,18 @@ export default function UploadManager({ onUploadComplete, folderId }: UploadMana
     <div className="w-full">
       <div
         {...getRootProps()}
-        className={`group cursor-pointer rounded-2xl border-2 border-dashed px-6 py-8 transition-all duration-200 ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white shadow-sm hover:border-blue-400 hover:bg-blue-50/30'}`}
+        className={`group flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gray-900 px-4 py-3.5 text-sm font-bold text-white shadow-sm transition-all duration-200 active:bg-gray-800 sm:block sm:rounded-2xl sm:border-2 sm:border-dashed sm:bg-white sm:px-6 sm:py-8 sm:text-gray-900 sm:shadow-sm ${isDragActive ? 'sm:border-blue-500 sm:bg-blue-50' : 'sm:border-gray-200 sm:hover:border-blue-400 sm:hover:bg-blue-50/30'} `}
       >
         <input {...getInputProps()} />
-        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+
+        {/* Mobile Button Content */}
+        <div className="flex items-center gap-2 sm:hidden">
+          <FiUploadCloud className="h-5 w-5" />
+          <span>Upload Files</span>
+        </div>
+
+        {/* Desktop Dropzone Content */}
+        <div className="hidden flex-col items-center justify-center gap-4 sm:flex sm:flex-row">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50 transition-colors group-hover:bg-blue-100">
             <FiUploadCloud className="h-6 w-6 text-blue-600" />
           </div>
@@ -149,7 +157,7 @@ export default function UploadManager({ onUploadComplete, folderId }: UploadMana
             </p>
           </div>
           <div className="hidden sm:ml-auto sm:block">
-            <span className="rounded-full bg-gray-900 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all group-hover:bg-gray-800">
+            <span className="rounded-full bg-gray-900 px-5 py-2 text-sm font-semibold text-nowrap text-white shadow-sm transition-all group-hover:bg-gray-800">
               Browse Files
             </span>
           </div>
