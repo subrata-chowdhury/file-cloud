@@ -10,7 +10,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
       `SELECT f.*, u.name as "ownerName", u.email as "ownerEmail" 
        FROM "File" f 
        JOIN "User" u ON f."ownerId" = u.id 
-       WHERE f.id = $1`,
+       WHERE f.id = $1 AND f."isTrashed" = false`,
       [fileId]
     );
 
