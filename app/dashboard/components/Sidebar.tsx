@@ -13,6 +13,9 @@ import {
   FiFile,
   FiX,
   FiTrash2,
+  FiHome,
+  FiStar,
+  FiUsers,
 } from 'react-icons/fi';
 import { useMobileMenu } from '../context/MobileMenuContext';
 
@@ -21,6 +24,13 @@ interface Stats {
   totalFiles: number;
   totalFolders: number;
 }
+
+const navLinks = [
+  { name: 'My Files', href: '/dashboard', icon: FiHome },
+  { name: 'Shared with me', href: '/dashboard/shared', icon: FiUsers },
+  { name: 'Favorites', href: '/dashboard/favorites', icon: FiStar },
+  { name: 'Settings', href: '/dashboard/settings', icon: FiSettings },
+];
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -56,10 +66,6 @@ export default function Sidebar() {
 
   const percentageUsed = Math.min(100, (stats.totalBytes / MAX_BYTES) * 100);
 
-  const navLinks = [
-    { name: 'Your Files', href: '/dashboard', icon: FiFolder },
-    { name: 'Settings', href: '/dashboard/settings', icon: FiSettings },
-  ];
 
   return (
     <>

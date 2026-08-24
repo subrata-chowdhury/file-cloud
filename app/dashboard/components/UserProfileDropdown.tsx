@@ -3,14 +3,10 @@
 import { FiLogOut, FiSettings, FiCreditCard, FiHelpCircle, FiUser } from 'react-icons/fi';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-
-interface User {
-  name: string;
-  email: string;
-}
+import { useUser } from '../context/UserContext';
 
 export default function UserProfileDropdown() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -28,30 +24,20 @@ export default function UserProfileDropdown() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch('/api/user');
-        if (res.ok) {
-          setUser(await res.json());
-        }
-      } catch (err) {}
-    }
-    fetchUser();
-  }, []);
-
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     window.location.href = '/';
   };
 
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | null) => {
     return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .substring(0, 2)
-      .toUpperCase();
+      ? name
+          .split(' ')
+          .map((n) => n[0])
+          .join('')
+          .substring(0, 2)
+          .toUpperCase()
+      : 'U';
   };
 
   return (

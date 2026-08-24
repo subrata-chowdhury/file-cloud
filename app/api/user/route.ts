@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { rows } = await query(`SELECT name, email FROM "User" WHERE id = $1`, [userId]);
+    const { rows } = await query(`SELECT id, name, email FROM "User" WHERE id = $1`, [userId]);
 
     if (rows.length === 0) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });

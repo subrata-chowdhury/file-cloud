@@ -1,36 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 import ProfileBanner from './components/ProfileBanner';
 import ProfileStatus from './components/ProfileStatus';
 import PersonalInfoForm from './components/PersonalInfoForm';
 import SecurityForm from './components/SecurityForm';
-
-interface UserProfile {
-  name: string;
-  email: string;
-}
+import { useUser } from '../context/UserContext';
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { user: profile, refreshUser } = useUser();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch('/api/user');
-        if (res.ok) {
-          const data = await res.json();
-          setProfile(data);
-        }
-      } catch (err) {
-        console.error('Failed to load profile', err);
-      }
-    }
-    fetchUser();
-  }, []);
 
   const handleSaveProfile = async (name: string) => {
     setLoading(true);
@@ -45,7 +26,7 @@ export default function ProfilePage() {
 
       if (res.ok) {
         setMessage({ type: 'success', text: 'Profile updated successfully!' });
-        setProfile((prev) => (prev ? { ...prev, name } : null));
+        await refreshUser();
       } else {
         const data = await res.json();
         setMessage({ type: 'error', text: data.error || 'Failed to update profile' });

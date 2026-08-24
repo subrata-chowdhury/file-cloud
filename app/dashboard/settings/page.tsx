@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -12,15 +12,11 @@ import {
   FiCheckCircle,
 } from 'react-icons/fi';
 import ConfirmModal from '../components/ConfirmModal';
-
-interface UserProfile {
-  name: string;
-  email: string;
-}
+import { useUser } from '../context/UserContext';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { user: profile } = useUser();
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [isDataModalOpen, setIsDataModalOpen] = useState(false);
@@ -30,20 +26,6 @@ export default function SettingsPage() {
   const [deleteProgress, setDeleteProgress] = useState(0);
   const [deleteTotal, setDeleteTotal] = useState(0);
   const [deleteMessage, setDeleteMessage] = useState('');
-
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch('/api/user');
-        if (res.ok) {
-          setProfile(await res.json());
-        }
-      } catch (err) {
-        console.error('Failed to load profile', err);
-      }
-    }
-    fetchUser();
-  }, []);
 
   const handleLogout = async () => {
     try {
@@ -140,7 +122,7 @@ export default function SettingsPage() {
     }
   };
 
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | null) => {
     return name
       ? name
           .split(' ')

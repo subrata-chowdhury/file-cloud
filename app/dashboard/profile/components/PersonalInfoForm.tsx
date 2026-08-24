@@ -2,7 +2,7 @@ import { FiUser, FiSave } from 'react-icons/fi';
 import { useState } from 'react';
 
 interface PersonalInfoFormProps {
-  initialName: string;
+  initialName: string | null;
   email: string;
   onSave: (name: string) => Promise<void>;
   loading: boolean;
@@ -14,7 +14,7 @@ export default function PersonalInfoForm({
   onSave,
   loading,
 }: PersonalInfoFormProps) {
-  const [name, setName] = useState(initialName);
+  const [name, setName] = useState(initialName || '');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,12 +1,12 @@
 import { FiMail } from 'react-icons/fi';
 
 interface ProfileBannerProps {
-  name: string;
+  name: string | null;
   email: string;
 }
 
 export default function ProfileBanner({ name, email }: ProfileBannerProps) {
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | null) => {
     return name
       ? name
           .split(' ')
