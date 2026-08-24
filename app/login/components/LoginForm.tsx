@@ -41,21 +41,25 @@ export default function LoginForm() {
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="mb-8">
-        <h1 className="font-display mb-2 text-3xl font-bold text-gray-900">Welcome back</h1>
-        <p className="text-gray-500">Please enter your details to sign in.</p>
+        <h1 className="font-display mb-2 text-3xl font-bold text-gray-900 dark:text-white">
+          Welcome back
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400">Please enter your details to sign in.</p>
       </div>
 
       <form onSubmit={handleLogin} className="space-y-5">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Email Address</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Email Address
+          </label>
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <FiMail className="h-5 w-5 text-gray-400" />
+              <FiMail className="h-5 w-5 text-gray-400 dark:text-gray-500" />
             </div>
             <input
               type="email"
               required
-              className="block w-full rounded-lg border border-gray-300 py-2.5 pr-3 pl-10 text-gray-900 transition-colors focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="block w-full rounded-lg border border-gray-300 bg-white py-2.5 pr-3 pl-10 text-gray-900 transition-colors focus:border-gray-900 focus:ring-gray-900 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-400 dark:focus:ring-gray-400"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -64,22 +68,24 @@ export default function LoginForm() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Password</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Password
+          </label>
           <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <FiLock className="h-5 w-5 text-gray-400" />
+              <FiLock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
             </div>
             <input
               type={showPassword ? 'text' : 'password'}
               required
-              className="block w-full rounded-lg border border-gray-300 py-2.5 pr-10 pl-10 text-gray-900 transition-colors focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="block w-full rounded-lg border border-gray-300 bg-white py-2.5 pr-10 pl-10 text-gray-900 transition-colors focus:border-gray-900 focus:ring-gray-900 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-gray-400 dark:focus:ring-gray-400"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
             <button
               type="button"
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 transition-colors hover:text-gray-900 focus:outline-none dark:hover:text-white"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
@@ -88,7 +94,7 @@ export default function LoginForm() {
         </div>
 
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-red-600">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-red-600 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
             {error}
           </div>
         )}
@@ -96,7 +102,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center rounded-lg border border-transparent bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-70"
+          className="flex w-full items-center justify-center rounded-lg border border-transparent bg-gray-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-md focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 focus:outline-none disabled:opacity-70 disabled:hover:translate-y-0 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 dark:focus:ring-white dark:focus:ring-offset-gray-900"
         >
           {loading ? (
             <>
@@ -109,11 +115,11 @@ export default function LoginForm() {
         </button>
       </form>
 
-      <div className="mt-8 text-center text-sm text-gray-600">
+      <div className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
         Don't have an account?{' '}
         <Link
           href="/register"
-          className="font-semibold text-blue-600 transition-colors hover:text-blue-500"
+          className="font-semibold text-gray-900 underline decoration-gray-300 underline-offset-4 transition-colors hover:text-gray-600 dark:text-white dark:decoration-gray-600 dark:hover:text-gray-300"
         >
           Sign up
         </Link>
