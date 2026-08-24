@@ -23,7 +23,7 @@ export default function UserProfileDropdown() {
       ) {
         setIsOpen(false);
       }
-    };
+    }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -58,54 +58,56 @@ export default function UserProfileDropdown() {
     <div className="relative" ref={profileRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-medium text-white shadow-sm transition-transform hover:scale-105"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-900 text-sm font-medium text-white shadow-sm transition-transform hover:scale-105 dark:bg-white dark:text-zinc-900"
       >
         {user ? getInitials(user.name) : '...'}
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-72 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl backdrop-blur-xl transition-all">
-          <div className="flex items-center gap-4 border-b border-gray-100 bg-gray-50/50 p-5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-lg font-bold text-white shadow-sm">
+        <div className="absolute top-full right-0 mt-2 w-72 overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-xl backdrop-blur-xl transition-all dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center gap-4 border-b border-zinc-100 bg-zinc-50/50 p-5 dark:border-zinc-800 dark:bg-zinc-800/50">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-lg font-bold text-white shadow-sm dark:bg-white dark:text-zinc-900">
               {user ? getInitials(user.name) : '...'}
             </div>
             <div className="flex min-w-0 flex-col">
-              <p className="truncate text-sm font-bold text-gray-900">
+              <p className="truncate text-sm font-bold text-zinc-900 dark:text-white">
                 {user ? user.name : 'Loading...'}
               </p>
-              <p className="truncate text-xs font-medium text-gray-500">{user ? user.email : ''}</p>
+              <p className="truncate text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                {user ? user.email : ''}
+              </p>
             </div>
           </div>
 
           <div className="p-2">
             <Link
               href="/dashboard/profile"
-              className="flex w-full items-center rounded-xl px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+              className="flex w-full items-center rounded-xl px-4 py-2.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
             >
-              <FiUser className="mr-3 h-4 w-4 text-gray-400" />
+              <FiUser className="mr-3 h-4 w-4 text-zinc-400" />
               Your Profile
             </Link>
             <Link
               href="/dashboard/settings"
-              className="flex w-full items-center rounded-xl px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+              className="flex w-full items-center rounded-xl px-4 py-2.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
             >
-              <FiSettings className="mr-3 h-4 w-4 text-gray-400" />
+              <FiSettings className="mr-3 h-4 w-4 text-zinc-400" />
               Settings
             </Link>
           </div>
 
-          <div className="h-px w-full bg-gray-100"></div>
+          <div className="h-px w-full bg-zinc-100 dark:bg-zinc-800"></div>
 
           <div className="p-2">
-            <button className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900">
+            <button className="flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white">
               <div className="flex items-center">
-                <FiHelpCircle className="mr-3 h-4 w-4 text-gray-400" />
+                <FiHelpCircle className="mr-3 h-4 w-4 text-zinc-400" />
                 Help & Support
               </div>
             </button>
             <button
               onClick={handleLogout}
-              className="mt-1 flex w-full items-center rounded-xl px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
+              className="mt-1 flex w-full items-center rounded-xl px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-500/10"
             >
               <FiLogOut className="mr-3 h-4 w-4 text-red-500" />
               Log out

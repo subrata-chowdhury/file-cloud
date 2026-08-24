@@ -23,11 +23,7 @@ export default function FolderCard({ folder, onClick, onDelete }: FolderCardProp
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        menuRef.current &&
-        e.target instanceof Node &&
-        !menuRef.current.contains(e.target)
-      ) {
+      if (menuRef.current && e.target instanceof Node && !menuRef.current.contains(e.target)) {
         setShowMenu(false);
       }
     };
@@ -40,17 +36,23 @@ export default function FolderCard({ folder, onClick, onDelete }: FolderCardProp
   return (
     <div
       onClick={() => onClick(folder.id)}
-      className="group relative flex cursor-pointer items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-blue-300 hover:shadow-md"
+      className="group relative flex cursor-pointer items-center justify-between rounded-xl border border-zinc-200 bg-white p-3 shadow-sm transition-all duration-200 hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
     >
-      <div className="flex min-w-0 items-center gap-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-100">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-100/80 text-zinc-600 transition-colors group-hover:bg-zinc-200/80 dark:bg-zinc-800/80 dark:text-zinc-400 dark:group-hover:bg-zinc-700/80">
           <FiFolder className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-semibold text-gray-900 transition-colors group-hover:text-blue-600">
+          <h3 className="truncate text-sm font-medium text-zinc-900 transition-colors dark:text-zinc-100">
             {folder.name}
           </h3>
-          <p className="text-xs text-gray-500">{new Date(folder.createdAt).toLocaleDateString()}</p>
+          <p className="mt-0.5 text-[11px] font-medium tracking-wide text-zinc-500 dark:text-zinc-400">
+            {new Date(folder.createdAt).toLocaleDateString(undefined, {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}
+          </p>
         </div>
       </div>
 
@@ -60,32 +62,21 @@ export default function FolderCard({ folder, onClick, onDelete }: FolderCardProp
             e.stopPropagation();
             setShowMenu(!showMenu);
           }}
-          className="rounded-full p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+          className="rounded-lg p-1.5 text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
         >
           <FiMoreVertical className="h-4 w-4" />
         </button>
         {showMenu && (
-          <div className="absolute top-full right-0 z-10 mt-1 w-36 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl">
-            {/* <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowMenu(false);
-                // trigger rename
-              }}
-              className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              <FiEdit2 className="mr-2 h-4 w-4 text-gray-400" />
-              Rename
-            </button> */}
+          <div className="absolute top-full right-0 z-10 mt-1 w-36 origin-top-right overflow-hidden rounded-xl border border-zinc-200/50 bg-white/80 p-1 shadow-lg backdrop-blur-md outline-none dark:border-zinc-800/50 dark:bg-zinc-900/80">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setShowMenu(false);
                 onDelete(folder.id);
               }}
-              className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50"
+              className="flex w-full items-center rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
             >
-              <FiTrash2 className="mr-2 h-4 w-4 text-red-500" />
+              <FiTrash2 className="mr-2 h-3.5 w-3.5" />
               Delete
             </button>
           </div>

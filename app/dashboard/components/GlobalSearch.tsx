@@ -27,7 +27,7 @@ export default function GlobalSearch() {
       ) {
         setIsOpen(false);
       }
-    };
+    }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -79,7 +79,7 @@ export default function GlobalSearch() {
 
   return (
     <div className="group relative hidden md:block" ref={searchRef}>
-      <FiSearch className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-500" />
+      <FiSearch className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400 transition-colors group-focus-within:text-zinc-900 dark:text-zinc-500 dark:group-focus-within:text-white" />
       <input
         type="text"
         placeholder="Search files..."
@@ -88,19 +88,19 @@ export default function GlobalSearch() {
           if (searchInput) setIsOpen(true);
         }}
         onChange={(e) => setSearchInput(e.target.value)}
-        className="w-64 rounded-full border border-gray-200 bg-gray-50 py-2 pr-4 pl-9 text-sm text-gray-900 transition-all focus:w-80 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+        className="w-64 rounded-full border border-zinc-200 bg-zinc-50 py-2 pr-4 pl-9 text-sm text-zinc-900 transition-all focus:w-80 focus:border-zinc-900 focus:bg-white focus:ring-4 focus:ring-zinc-900/10 focus:outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:focus:border-zinc-600 dark:focus:bg-zinc-800 dark:focus:ring-white/10"
       />
 
       {isOpen && searchInput.trim() !== '' && (
-        <div className="absolute top-full mt-2 w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl backdrop-blur-xl">
+        <div className="absolute top-full mt-2 w-full overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900">
           <div className="p-2">
             {isSearching ? (
-              <div className="flex items-center justify-center py-6 text-gray-400">
+              <div className="flex items-center justify-center py-6 text-zinc-400">
                 <FiLoader className="h-5 w-5 animate-spin" />
               </div>
             ) : results.length > 0 ? (
               <div className="flex flex-col space-y-1">
-                <div className="px-3 py-2 text-xs font-semibold tracking-wider text-gray-500 uppercase">
+                <div className="px-3 py-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase">
                   Results
                 </div>
                 {results.map((file) => (
@@ -111,17 +111,19 @@ export default function GlobalSearch() {
                       setIsOpen(false);
                       setSearchInput('');
                     }}
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-gray-50"
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800"
                   >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
                       {getFileIcon(file)}
                     </div>
-                    <span className="truncate text-sm font-medium text-gray-700">{file.name}</span>
+                    <span className="truncate text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      {file.name}
+                    </span>
                   </button>
                 ))}
               </div>
             ) : (
-              <div className="py-6 text-center text-sm text-gray-500">
+              <div className="py-6 text-center text-sm text-zinc-500">
                 No files found for "{searchInput}"
               </div>
             )}

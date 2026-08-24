@@ -20,15 +20,15 @@ export default function DashboardNav() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-gray-100 bg-white/80 px-4 shadow-sm backdrop-blur-md sm:px-8">
+    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-zinc-200 bg-white px-4 shadow-sm sm:px-8 dark:border-zinc-800 dark:bg-zinc-950">
       <div className="flex items-center gap-4">
         <button
           onClick={() => setIsOpen(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 lg:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-500 transition-colors hover:bg-zinc-100 lg:hidden dark:hover:bg-zinc-800"
         >
           <FiMenu className="h-5 w-5" />
         </button>
-        <h1 className="font-display hidden text-xl font-semibold text-gray-900 sm:block">
+        <h1 className="font-display hidden text-xl font-semibold text-zinc-900 sm:block dark:text-white">
           {getPageTitle()}
         </h1>
       </div>
@@ -36,7 +36,7 @@ export default function DashboardNav() {
       <div className="flex items-center gap-2 sm:gap-4">
         <GlobalSearch />
         <NotificationDropdown />
-        <div className="hidden h-8 w-px bg-gray-200 sm:block"></div>
+        <div className="hidden h-8 w-px bg-zinc-200 sm:block dark:bg-zinc-800"></div>
         <UserProfileDropdown />
       </div>
     </header>

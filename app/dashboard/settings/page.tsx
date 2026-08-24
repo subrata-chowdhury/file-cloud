@@ -27,6 +27,10 @@ export default function SettingsPage() {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [deleteProgress, setDeleteProgress] = useState(0);
+  const [deleteTotal, setDeleteTotal] = useState(0);
+  const [deleteMessage, setDeleteMessage] = useState('');
+
   useEffect(() => {
     async function fetchUser() {
       try {
@@ -50,13 +54,61 @@ export default function SettingsPage() {
     }
   };
 
+  const processStream = async (res: Response, onSuccess: () => void) => {
+    const reader = res.body?.getReader();
+    const decoder = new TextDecoder();
+    if (!reader) throw new Error('No stream available');
+
+    let streamDone = false;
+    while (!streamDone) {
+      const { value, done: readerDone } = await reader.read();
+      streamDone = readerDone;
+      if (value) {
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (line.trim().startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.trim().slice(6));
+              if (data.progress !== undefined) setDeleteProgress(data.progress);
+              if (data.total !== undefined) setDeleteTotal(data.total);
+              if (data.message !== undefined) setDeleteMessage(data.message);
+
+              if (data.done) {
+                if (data.error) {
+                  setMessage({ type: 'error', text: data.error });
+                } else {
+                  onSuccess();
+                }
+              }
+            } catch (e) {
+              console.error('Failed to parse SSE line:', line, e);
+            }
+          }
+        }
+      }
+    }
+  };
+
+  const resetDeleteState = () => {
+    setDeleteProgress(0);
+    setDeleteTotal(0);
+    setDeleteMessage('');
+  };
+
   const handleDeleteData = async () => {
     setIsDeleting(true);
+    resetDeleteState();
     try {
       const res = await fetch('/api/user/data', { method: 'DELETE' });
-      if (res.ok) {
-        setMessage({ type: 'success', text: 'All files and folders have been securely deleted.' });
-        setIsDataModalOpen(false);
+      if (res.ok && res.headers.get('content-type')?.includes('text/event-stream')) {
+        await processStream(res, () => {
+          setMessage({
+            type: 'success',
+            text: 'All files and folders have been securely deleted.',
+          });
+          setIsDataModalOpen(false);
+        });
       } else {
         const data = await res.json();
         setMessage({ type: 'error', text: data.error || 'Failed to delete data.' });
@@ -70,10 +122,13 @@ export default function SettingsPage() {
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
+    resetDeleteState();
     try {
       const res = await fetch('/api/user', { method: 'DELETE' });
-      if (res.ok) {
-        router.push('/login');
+      if (res.ok && res.headers.get('content-type')?.includes('text/event-stream')) {
+        await processStream(res, () => {
+          router.push('/login');
+        });
       } else {
         const data = await res.json();
         setMessage({ type: 'error', text: data.error || 'Failed to delete account.' });
@@ -99,7 +154,7 @@ export default function SettingsPage() {
   if (!profile) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-zinc-100"></div>
       </div>
     );
   }
@@ -107,12 +162,14 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          Settings
+        </h1>
       </div>
 
       {message && (
         <div
-          className={`mb-6 flex items-center gap-3 rounded-xl p-4 text-sm font-medium ${message.type === 'error' ? 'border border-red-100 bg-red-50 text-red-700' : 'border border-green-100 bg-green-50 text-green-700'}`}
+          className={`mb-6 flex items-center gap-3 rounded-xl p-4 text-sm font-medium ${message.type === 'error' ? 'border border-red-100 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400' : 'border border-green-100 bg-green-50 text-green-700 dark:border-green-900/50 dark:bg-green-900/20 dark:text-green-400'}`}
         >
           {message.type === 'error' ? (
             <FiAlertTriangle className="h-5 w-5" />
@@ -125,24 +182,28 @@ export default function SettingsPage() {
 
       <div className="space-y-5">
         {/* Account Overview */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           {/* Decorative background */}
-          <div className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full bg-blue-50/80 blur-2xl"></div>
-          <div className="pointer-events-none absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-indigo-50/80 blur-2xl"></div>
+          <div className="pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full bg-zinc-100/80 blur-2xl dark:bg-zinc-800/80"></div>
+          <div className="pointer-events-none absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-zinc-100/80 blur-2xl dark:bg-zinc-800/80"></div>
 
           <div className="relative z-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-xl font-bold text-white shadow-md shadow-blue-500/20">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-900 text-xl font-bold text-white shadow-md dark:bg-white dark:text-zinc-900">
                 {getInitials(profile.name)}
               </div>
               <div>
-                <h2 className="text-lg font-bold tracking-tight text-gray-900">{profile.name}</h2>
-                <p className="text-sm font-medium text-gray-500">{profile.email}</p>
+                <h2 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">
+                  {profile.name}
+                </h2>
+                <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  {profile.email}
+                </p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-bold text-gray-700 shadow-sm transition-all hover:border-red-100 hover:bg-red-50 hover:text-red-600 focus:ring-2 focus:ring-red-500/20 focus:outline-none"
+              className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-sm font-bold text-zinc-700 shadow-sm transition-all hover:border-red-100 hover:bg-red-50 hover:text-red-600 focus:ring-2 focus:ring-red-500/20 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-red-900/50 dark:hover:bg-red-900/20 dark:hover:text-red-400"
             >
               <FiLogOut className="h-4 w-4" />
               Log Out
@@ -151,50 +212,52 @@ export default function SettingsPage() {
         </div>
 
         {/* Profile Links */}
-        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <div className="border-b border-gray-50 bg-gray-50/50 px-5 py-3">
-            <h3 className="text-base font-bold text-gray-900">Account Preferences</h3>
+        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="border-b border-zinc-100 bg-zinc-50/50 px-5 py-3 dark:border-zinc-800 dark:bg-zinc-800/50">
+            <h3 className="text-base font-bold text-zinc-900 dark:text-white">
+              Account Preferences
+            </h3>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
             <Link
               href="/dashboard/profile"
-              className="group flex items-center justify-between p-5 transition-colors hover:bg-blue-50/30"
+              className="group flex items-center justify-between p-5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800"
             >
               <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-100">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-colors group-hover:bg-zinc-200 dark:bg-zinc-800 dark:text-white dark:group-hover:bg-zinc-700">
                   <FiUser className="h-4 w-4" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-gray-900 transition-colors group-hover:text-blue-700">
+                  <h4 className="text-sm font-bold text-zinc-900 transition-colors dark:text-white">
                     Personal Information
                   </h4>
-                  <p className="mt-0.5 text-xs text-gray-500">
+                  <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
                     Update your name and profile details.
                   </p>
                 </div>
               </div>
-              <span className="-translate-x-2 text-xs font-bold text-blue-600 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+              <span className="-translate-x-2 text-xs font-bold text-zinc-900 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 dark:text-white">
                 Edit &rarr;
               </span>
             </Link>
             <Link
               href="/dashboard/profile"
-              className="group flex items-center justify-between p-5 transition-colors hover:bg-indigo-50/30"
+              className="group flex items-center justify-between p-5 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800"
             >
               <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-100">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 transition-colors group-hover:bg-zinc-200 dark:bg-zinc-800 dark:text-white dark:group-hover:bg-zinc-700">
                   <FiShield className="h-4 w-4" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-gray-900 transition-colors group-hover:text-indigo-700">
+                  <h4 className="text-sm font-bold text-zinc-900 transition-colors dark:text-white">
                     Security & Password
                   </h4>
-                  <p className="mt-0.5 text-xs text-gray-500">
+                  <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
                     Change your password and secure your account.
                   </p>
                 </div>
               </div>
-              <span className="-translate-x-2 text-xs font-bold text-indigo-600 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+              <span className="-translate-x-2 text-xs font-bold text-zinc-900 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 dark:text-white">
                 Update &rarr;
               </span>
             </Link>
@@ -202,36 +265,36 @@ export default function SettingsPage() {
         </div>
 
         {/* Danger Zone */}
-        <div className="group relative overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm">
+        <div className="group relative overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm dark:border-red-900/30 dark:bg-zinc-900">
           {/* Subtle red background glow on hover */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-red-50/30 to-white opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-red-50/30 to-white opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-red-900/10 dark:to-zinc-900"></div>
 
-          <div className="relative z-10 border-b border-red-100 bg-red-50/50 px-5 py-3">
-            <h3 className="flex items-center gap-2 text-base font-bold text-red-600">
+          <div className="relative z-10 border-b border-red-100 bg-red-50/50 px-5 py-3 dark:border-red-900/30 dark:bg-red-900/5">
+            <h3 className="flex items-center gap-2 text-base font-bold text-red-600 dark:text-red-500">
               <FiAlertTriangle className="h-4 w-4" />
               Danger Zone
             </h3>
           </div>
-          <div className="relative z-10 divide-y divide-red-50">
-            <div className="flex flex-col items-start justify-between gap-4 p-5 transition-colors hover:bg-red-50/20 sm:flex-row sm:items-center">
+          <div className="relative z-10 divide-y divide-red-50 dark:divide-red-900/20">
+            <div className="flex flex-col items-start justify-between gap-4 p-5 transition-colors hover:bg-red-50/20 sm:flex-row sm:items-center dark:hover:bg-red-900/10">
               <div>
-                <h4 className="text-sm font-bold text-gray-900">Delete All Data</h4>
-                <p className="mt-0.5 text-xs text-gray-500">
+                <h4 className="text-sm font-bold text-zinc-900 dark:text-white">Delete All Data</h4>
+                <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
                   Permanently delete all your files, folders, and storage data. This action is
                   irreversible. Your account will remain active.
                 </p>
               </div>
               <button
                 onClick={() => setIsDataModalOpen(true)}
-                className="shrink-0 rounded-lg border border-red-200 bg-white px-4 py-2 text-xs font-bold text-red-600 shadow-sm transition-all hover:border-red-300 hover:bg-red-50 hover:text-red-700 focus:ring-2 focus:ring-red-500/20 focus:outline-none"
+                className="shrink-0 rounded-lg border border-red-200 bg-white px-4 py-2 text-xs font-bold text-red-600 shadow-sm transition-all hover:border-red-300 hover:bg-red-50 hover:text-red-700 focus:ring-2 focus:ring-red-500/20 focus:outline-none dark:border-red-900/30 dark:bg-zinc-800 dark:text-red-500 dark:hover:border-red-800 dark:hover:bg-red-900/20 dark:hover:text-red-400"
               >
                 Delete All Data
               </button>
             </div>
-            <div className="flex flex-col items-start justify-between gap-4 p-5 transition-colors hover:bg-red-50/20 sm:flex-row sm:items-center">
+            <div className="flex flex-col items-start justify-between gap-4 p-5 transition-colors hover:bg-red-50/20 sm:flex-row sm:items-center dark:hover:bg-red-900/10">
               <div>
-                <h4 className="text-sm font-bold text-gray-900">Delete Account</h4>
-                <p className="mt-0.5 text-xs text-gray-500">
+                <h4 className="text-sm font-bold text-zinc-900 dark:text-white">Delete Account</h4>
+                <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
                   Permanently delete your entire account along with all its data. You will
                   immediately be logged out.
                 </p>
@@ -256,6 +319,9 @@ export default function SettingsPage() {
         onConfirm={handleDeleteData}
         onClose={() => setIsDataModalOpen(false)}
         loading={isDeleting}
+        progress={deleteProgress}
+        total={deleteTotal}
+        progressMessage={deleteMessage}
       />
 
       <ConfirmModal
@@ -266,6 +332,9 @@ export default function SettingsPage() {
         onConfirm={handleDeleteAccount}
         onClose={() => setIsAccountModalOpen(false)}
         loading={isDeleting}
+        progress={deleteProgress}
+        total={deleteTotal}
+        progressMessage={deleteMessage}
       />
     </div>
   );

@@ -5,7 +5,7 @@ import { MobileMenuProvider } from './context/MobileMenuContext';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <MobileMenuProvider>
-      <div className="flex min-h-screen bg-gray-50/50">
+      <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
         <Sidebar />
         <div className="flex w-full flex-col transition-all lg:pl-64">
           <DashboardNav />

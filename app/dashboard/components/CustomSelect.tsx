@@ -47,10 +47,10 @@ export default function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-left text-sm text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-left text-sm text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-gray-900 focus:outline-none dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:ring-white"
       >
         <div className="flex items-center space-x-2 truncate">
-          {icon && <span className="text-gray-400">{icon}</span>}
+          {icon && <span className="text-gray-400 dark:text-gray-500">{icon}</span>}
           <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
         </div>
         <FiChevronDown
@@ -59,7 +59,7 @@ export default function CustomSelect({
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-2 max-h-60 w-full origin-top overflow-auto rounded-xl border border-gray-100 bg-white py-1 shadow-lg transition-all">
+        <div className="absolute z-10 mt-2 max-h-60 w-full origin-top overflow-auto rounded-xl border border-gray-100 bg-white py-1 shadow-lg transition-all dark:border-gray-800 dark:bg-gray-900">
           {options.map((option) => (
             <button
               key={option.value}
@@ -69,12 +69,14 @@ export default function CustomSelect({
               }}
               className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm transition-colors ${
                 value === option.value
-                  ? 'bg-blue-50 font-medium text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-white'
+                  : 'text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'
               }`}
             >
               <span className="truncate">{option.label}</span>
-              {value === option.value && <FiCheck className="h-4 w-4 text-blue-600" />}
+              {value === option.value && (
+                <FiCheck className="h-4 w-4 text-gray-900 dark:text-white" />
+              )}
             </button>
           ))}
         </div>

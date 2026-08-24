@@ -65,36 +65,43 @@ export default function Sidebar() {
       {/* Mobile Sidebar Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm transition-opacity lg:hidden"
+          className="fixed inset-0 z-40 bg-gray-900/40 backdrop-blur-sm transition-opacity lg:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-100 bg-white shadow-sm transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-zinc-200 bg-white transition-transform duration-300 ease-in-out lg:translate-x-0 dark:border-zinc-800 dark:bg-zinc-950 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Branding */}
-        <div className="flex h-16 shrink-0 items-center justify-between px-6">
-          <Link href="/" className="group flex items-center gap-2" onClick={() => setIsOpen(false)}>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm transition-transform group-hover:scale-105">
+        <div className="flex h-16 shrink-0 items-center justify-between px-6 pt-2">
+          <Link
+            href="/"
+            className="group flex items-center gap-2.5"
+            onClick={() => setIsOpen(false)}
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-sm transition-transform group-hover:scale-105 dark:bg-zinc-100 dark:text-zinc-900">
               <FiCloud className="h-5 w-5" />
             </div>
-            <span className="font-display text-xl font-bold tracking-tight text-gray-900">
+            <span className="font-display text-lg font-semibold tracking-tight text-zinc-900 dark:text-white">
               FileCloud
             </span>
           </Link>
           <button
             onClick={() => setIsOpen(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 lg:hidden"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 lg:hidden dark:hover:bg-zinc-800"
           >
             <FiX className="h-5 w-5" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-4">
+        <nav className="flex-1 space-y-1.5 overflow-y-auto px-4 py-6">
+          <p className="mb-2 px-3 text-xs font-medium tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
+            Overview
+          </p>
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -103,13 +110,15 @@ export default function Sidebar() {
                 href={link.href}
                 className={`group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-zinc-100 text-zinc-900 shadow-sm ring-1 ring-zinc-200/50 dark:bg-zinc-800 dark:text-white dark:ring-zinc-700/50'
+                    : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-200'
                 }`}
               >
                 <link.icon
-                  className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${
-                    isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
+                  className={`mr-3 h-4 w-4 flex-shrink-0 transition-colors ${
+                    isActive
+                      ? 'text-zinc-900 dark:text-white'
+                      : 'text-zinc-400 group-hover:text-zinc-500 dark:group-hover:text-zinc-300'
                   }`}
                 />
                 {link.name}
@@ -118,61 +127,55 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Bottom Section: Stats & Logout */}
-        <div className="mt-auto border-t border-gray-100 p-4">
-          {/* Mini Stats Widget */}
-          <div className="group relative overflow-hidden rounded-2xl border border-gray-100/50 bg-gradient-to-br from-gray-50 to-white p-4 shadow-sm transition-all hover:shadow-md">
-            {/* Subtle background decoration */}
-            <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-blue-50/50 blur-2xl transition-all duration-500 group-hover:scale-150 group-hover:bg-blue-100/50"></div>
-
+        {/* Bottom Section: Stats */}
+        <div className="mt-auto p-4 pb-6">
+          <div className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
             <div className="relative mb-4">
               <div className="mb-2 flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-700">
-                  <FiDatabase className="h-3.5 w-3.5 text-blue-500" />
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  <FiDatabase className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500" />
                   Storage
                 </span>
-                <span className="text-[10px] font-bold tracking-wider text-gray-500">
+                <span className="text-[10px] font-bold tracking-wider text-zinc-500 dark:text-zinc-400">
                   {loading ? '...' : formatSize(stats.totalBytes)}{' '}
-                  <span className="font-medium text-gray-400">/ 1GB</span>
+                  <span className="font-medium text-zinc-400 dark:text-zinc-500">/ 1GB</span>
                 </span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100/80 shadow-inner">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
                 <div
                   className={`h-full rounded-full transition-all duration-1000 ease-out ${
                     percentageUsed > 90
-                      ? 'bg-gradient-to-r from-red-500 to-orange-400 shadow-[0_0_10px_rgba(239,68,68,0.4)]'
+                      ? 'bg-red-500'
                       : percentageUsed > 75
-                        ? 'bg-gradient-to-r from-yellow-400 to-orange-400 shadow-[0_0_10px_rgba(250,204,21,0.4)]'
-                        : 'bg-gradient-to-r from-blue-500 to-indigo-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]'
+                        ? 'bg-amber-500'
+                        : 'bg-zinc-900 dark:bg-zinc-100'
                   }`}
                   style={{ width: `${loading ? 0 : percentageUsed}%` }}
                 />
               </div>
             </div>
 
-            <div className="relative grid grid-cols-2 gap-3 border-t border-gray-100/60 pt-3">
-              <div className="flex items-center gap-2.5 rounded-xl bg-gray-50/80 p-2 transition-colors hover:bg-white hover:shadow-sm">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                  <FiFile className="h-3.5 w-3.5" />
+            <div className="grid grid-cols-2 gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-800/60">
+              <div className="flex items-center gap-2 rounded-xl bg-zinc-50 p-2 transition-colors hover:bg-zinc-100/50 dark:bg-zinc-800/30 dark:hover:bg-zinc-800/60">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-white text-zinc-500 shadow-sm dark:bg-zinc-800 dark:text-zinc-400">
+                  <FiFile className="h-3 w-3" />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[9px] font-bold tracking-wider text-gray-400 uppercase">
-                    Files
-                  </p>
-                  <p className="truncate text-sm font-bold text-gray-900">
+                <div>
+                  <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">Files</p>
+                  <p className="text-sm leading-none font-semibold text-zinc-900 dark:text-white">
                     {loading ? '-' : stats.totalFiles}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2.5 rounded-xl bg-gray-50/80 p-2 transition-colors hover:bg-white hover:shadow-sm">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                  <FiFolder className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-2 rounded-xl bg-zinc-50 p-2 transition-colors hover:bg-zinc-100/50 dark:bg-zinc-800/30 dark:hover:bg-zinc-800/60">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-white text-zinc-500 shadow-sm dark:bg-zinc-800 dark:text-zinc-400">
+                  <FiFolder className="h-3 w-3" />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[9px] font-bold tracking-wider text-gray-400 uppercase">
+                <div>
+                  <p className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
                     Folders
                   </p>
-                  <p className="truncate text-sm font-bold text-gray-900">
+                  <p className="text-sm leading-none font-semibold text-zinc-900 dark:text-white">
                     {loading ? '-' : stats.totalFolders}
                   </p>
                 </div>
