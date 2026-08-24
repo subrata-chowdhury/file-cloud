@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { FiFile, FiImage, FiVideo, FiDownload, FiCloud } from 'react-icons/fi';
-import Link from 'next/link';
+import { FiDownload } from 'react-icons/fi';
+import ShareNavbar from '../components/ShareNavbar';
+import ShareError from '../components/ShareError';
+import ShareFileInfo from '../components/ShareFileInfo';
+import ShareFilePreview from '../components/ShareFilePreview';
 
 interface StoredFile {
   id: string;
@@ -43,100 +46,46 @@ export default function SharePage({ params }: { params: Promise<{ id: string }> 
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-800 dark:border-t-white"></div>
       </div>
     );
   }
 
   if (error || !file) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <FiCloud className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-          <h2 className="mb-2 text-2xl font-bold text-gray-900">Access Denied</h2>
-          <p className="text-gray-500">{error || 'File not found or is private.'}</p>
-          <Link href="/" className="mt-6 inline-block text-blue-600 hover:underline">
-            Go to Homepage
-          </Link>
-        </div>
-      </div>
-    );
+    return <ShareError error={error} />;
   }
 
-  const isImage = file.mimeType.startsWith('image/');
-  const isVideo = file.mimeType.startsWith('video/');
-
-  const formatSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
-      <nav className="border-b border-gray-200 bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <Link href="/" className="flex items-center">
-              <FiCloud className="mr-2 h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">FileCloud</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
+      <ShareNavbar />
 
-      <main className="flex flex-1 items-center justify-center p-4">
-        <div className="w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-lg">
-          <div className="p-8">
-            <div className="mb-8 flex items-center space-x-4">
-              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50">
-                {isImage ? (
-                  <FiImage className="h-8 w-8 text-blue-500" />
-                ) : isVideo ? (
-                  <FiVideo className="h-8 w-8 text-purple-500" />
-                ) : (
-                  <FiFile className="h-8 w-8 text-gray-500" />
-                )}
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold break-all text-gray-900">{file.name}</h1>
-                <p className="mt-1 flex items-center space-x-2 text-gray-500">
-                  <span>{formatSize(file.size)}</span>
-                  <span>•</span>
-                  <span>Shared by {file.owner?.name || 'a user'}</span>
-                </p>
-              </div>
-            </div>
+      <main className="flex flex-1 items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
+        <div className="w-full max-w-4xl overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900/50">
+          <div className="p-6 sm:p-10">
+            <ShareFileInfo 
+              name={file.name} 
+              size={file.size} 
+              mimeType={file.mimeType} 
+              ownerName={file.owner?.name} 
+            />
 
-            <div className="mb-8 flex min-h-[300px] items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
-              {isImage ? (
-                <img
-                  src={file.url}
-                  alt={file.name}
-                  className="max-h-[500px] max-w-full object-contain"
-                />
-              ) : isVideo ? (
-                <video src={file.url} controls className="max-h-[500px] max-w-full" />
-              ) : (
-                <div className="p-12 text-center text-gray-500">
-                  <FiFile className="mx-auto mb-4 h-16 w-16 text-gray-400" />
-                  <p>Preview not available for this file type.</p>
-                </div>
-              )}
-            </div>
+            <ShareFilePreview 
+              name={file.name} 
+              url={file.url} 
+              mimeType={file.mimeType} 
+            />
 
-            <div className="flex justify-center">
+            <div className="flex justify-end">
               <a
                 href={file.url}
                 download
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 px-6 py-4 text-sm font-medium text-white transition-all hover:bg-zinc-800 sm:w-auto dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
               >
-                <FiDownload className="mr-2 h-5 w-5" /> Download File
+                <FiDownload className="h-5 w-5 transition-transform group-hover:-translate-y-0.5" /> 
+                Download File
               </a>
             </div>
           </div>
