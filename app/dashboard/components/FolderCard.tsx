@@ -19,6 +19,7 @@ interface FolderCardProps {
 
 export default function FolderCard({ folder, onClick, onDelete }: FolderCardProps) {
   const [showMenu, setShowMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<'top' | 'bottom'>('bottom');
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,6 +33,19 @@ export default function FolderCard({ folder, onClick, onDelete }: FolderCardProp
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMenu]);
+
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    // ~100px for folder menu height
+    if (spaceBelow < 100) {
+      setMenuPosition('top');
+    } else {
+      setMenuPosition('bottom');
+    }
+    setShowMenu(!showMenu);
+  };
 
   return (
     <div
@@ -56,18 +70,21 @@ export default function FolderCard({ folder, onClick, onDelete }: FolderCardProp
         </div>
       </div>
 
-      <div className="relative" ref={menuRef}>
+      <div className="relative flex flex-col items-end" ref={menuRef}>
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowMenu(!showMenu);
-          }}
-          className="rounded-lg p-1.5 text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+          onClick={handleMenuClick}
+          className="relative z-10 rounded-lg p-1.5 text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
         >
           <FiMoreVertical className="h-4 w-4" />
         </button>
         {showMenu && (
-          <div className="absolute top-full right-0 z-10 mt-1 w-36 origin-top-right overflow-hidden rounded-xl border border-zinc-200/50 bg-white/80 p-1 shadow-lg backdrop-blur-md outline-none dark:border-zinc-800/50 dark:bg-zinc-900/80">
+          <div
+            className={`absolute right-0 z-20 w-36 overflow-hidden rounded-xl border border-zinc-200/50 bg-white/80 p-1 shadow-lg backdrop-blur-md outline-none dark:border-zinc-800/50 dark:bg-zinc-900/80 ${
+              menuPosition === 'top'
+                ? 'bottom-full mb-1 origin-bottom-right'
+                : 'top-full mt-1 origin-top-right'
+            }`}
+          >
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -77,7 +94,7 @@ export default function FolderCard({ folder, onClick, onDelete }: FolderCardProp
               className="flex w-full items-center rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
             >
               <FiTrash2 className="mr-2 h-3.5 w-3.5" />
-              Delete
+              Move to Trash
             </button>
           </div>
         )}

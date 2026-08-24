@@ -38,6 +38,7 @@ export default function FileCard({ file, onDelete, onTogglePrivacy, onRename }: 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(file.name);
   const [isSavingName, setIsSavingName] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<'top' | 'bottom'>('bottom');
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,6 +54,19 @@ export default function FileCard({ file, onDelete, onTogglePrivacy, onRename }: 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    // 250px is roughly the height of the menu + padding
+    if (spaceBelow < 250) {
+      setMenuPosition('top');
+    } else {
+      setMenuPosition('bottom');
+    }
+    setShowMenu(!showMenu);
+  };
 
   const isImage = file.mimeType.startsWith('image/');
   const isVideo = file.mimeType.startsWith('video/');
@@ -188,16 +202,22 @@ export default function FileCard({ file, onDelete, onTogglePrivacy, onRename }: 
         </div>
       </div>
 
-      <div className="absolute top-2 right-2" ref={menuRef}>
+      <div className="absolute top-2 right-2 flex flex-col items-end" ref={menuRef}>
         <button
-          onClick={() => setShowMenu(!showMenu)}
-          className="rounded-lg p-1.5 text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+          onClick={handleMenuClick}
+          className="relative z-10 rounded-lg p-1.5 text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
         >
           <FiMoreVertical className="h-4 w-4" />
         </button>
 
         {showMenu && (
-          <div className="absolute right-0 z-20 mt-1 w-44 origin-top-right overflow-hidden rounded-xl border border-zinc-200/50 bg-white/80 p-1 shadow-lg backdrop-blur-md outline-none dark:border-zinc-800/50 dark:bg-zinc-900/80">
+          <div
+            className={`absolute right-0 z-20 w-44 overflow-hidden rounded-xl border border-zinc-200/50 bg-white/80 p-1 shadow-lg backdrop-blur-md outline-none dark:border-zinc-800/50 dark:bg-zinc-900/80 ${
+              menuPosition === 'top'
+                ? 'bottom-full mb-1 origin-bottom-right'
+                : 'top-full mt-1 origin-top-right'
+            }`}
+          >
             <div className="flex flex-col gap-0.5" role="menu">
               <a
                 href={file.url}
@@ -250,7 +270,7 @@ export default function FileCard({ file, onDelete, onTogglePrivacy, onRename }: 
                 ) : (
                   <FiTrash2 className="mr-2 h-3.5 w-3.5" />
                 )}
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? 'Moving...' : 'Move to Trash'}
               </button>
             </div>
           </div>
