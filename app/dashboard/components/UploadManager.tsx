@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
-import { FiUploadCloud, FiX, FiCheckCircle } from 'react-icons/fi';
+import { FiUploadCloud, FiX, FiCheckCircle, FiMinus } from 'react-icons/fi';
 
 interface UploadManagerProps {
   onUploadComplete: () => void;
@@ -31,10 +31,13 @@ export default function UploadManager({
   children,
 }: UploadManagerProps) {
   const [tasks, setTasks] = useState<UploadTask[]>([]);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       if (acceptedFiles.length === 0) return;
+
+      setIsMinimized(false);
 
       // Initialize tasks for all dropped files
       const newTasks: UploadTask[] = acceptedFiles.map((file) => ({
@@ -53,9 +56,19 @@ export default function UploadManager({
           const next = prev.map((task) => (task.id === id ? { ...task, ...updates } : task));
 
           if (updates.status === 'completed' || updates.status === 'error') {
-            setTimeout(() => {
-              setTasks((current) => current.filter((t) => t.id !== id));
-            }, 5000);
+            const allDone = next.every((t) => t.status === 'completed' || t.status === 'error');
+            if (allDone) {
+              setTimeout(() => {
+                setTasks((current) => {
+                  // Only auto-clear if still all done (in case new files were dragged in)
+                  if (current.every((t) => t.status === 'completed' || t.status === 'error')) {
+                    setIsMinimized(false);
+                    return [];
+                  }
+                  return current;
+                });
+              }, 5000);
+            }
           }
 
           return next;
@@ -63,13 +76,10 @@ export default function UploadManager({
       };
 
       try {
-        // 1. Get Signature from backend once for all files (reusable if within timeframe, but safest to fetch fresh or reuse if recent)
-        // We'll fetch it per file to avoid edge cases, or just fetch once and reuse. Fetching once is faster.
         const sigRes = await fetch('/api/upload/signature');
         if (!sigRes.ok) throw new Error('Failed to get upload signature');
         const sigData = await sigRes.json();
 
-        // Process all files concurrently
         await Promise.all(
           newTasks.map(async (task) => {
             try {
@@ -95,7 +105,6 @@ export default function UploadManager({
 
               const uploadedFile = uploadRes.data;
 
-              // Save metadata to DB
               const saveRes = await fetch('/api/files', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -122,13 +131,12 @@ export default function UploadManager({
           })
         );
 
-        // Notify parent that new files are available
         onUploadComplete();
       } catch (err) {
         console.error('Failed to initiate uploads:', err);
       }
     },
-    [onUploadComplete]
+    [onUploadComplete, folderId]
   );
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
@@ -138,12 +146,27 @@ export default function UploadManager({
   });
 
   const removeTask = (id: string) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+    setTasks((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      if (next.length === 0) setIsMinimized(false);
+      return next;
+    });
   };
+
+  const activeTasks = tasks.filter((t) => t.status === 'uploading');
+  const totalProgress =
+    tasks.length > 0
+      ? Math.round(
+          tasks.reduce((acc, t) => {
+            if (t.status === 'completed' || t.status === 'error') return acc + 100;
+            return acc + t.progress;
+          }, 0) / tasks.length
+        )
+      : 100;
 
   return (
     <UploadContext.Provider value={{ openUploadDialog: open }}>
-      <div {...getRootProps()} className="relative flex min-h-screen w-full flex-col outline-none">
+      <div {...getRootProps()} className="relative flex min-h-[80vh] w-full flex-col outline-none">
         <input {...getInputProps()} />
 
         {isDragActive && (
@@ -162,18 +185,29 @@ export default function UploadManager({
 
         {children}
 
-        {tasks.length > 0 && (
+        {tasks.length > 0 && !isMinimized && (
           <div className="fixed right-6 bottom-6 z-50 flex max-h-[400px] w-80 flex-col gap-3 overflow-y-auto rounded-2xl border border-gray-100 bg-white p-4 shadow-2xl dark:border-gray-800 dark:bg-gray-900">
             <div className="flex items-center justify-between border-b border-gray-50 pb-2 dark:border-gray-800">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                Uploading {tasks.filter((t) => t.status === 'uploading').length} files
+                {activeTasks.length > 0
+                  ? `Uploading ${activeTasks.length} files`
+                  : 'Uploads finished'}
               </h3>
-              <button
-                onClick={() => setTasks([])}
-                className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-              >
-                <FiX className="h-4 w-4" />
-              </button>
+              {activeTasks.length > 0 ? (
+                <button
+                  onClick={() => setIsMinimized(true)}
+                  className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                >
+                  <FiMinus className="h-4 w-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => setTasks([])}
+                  className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                >
+                  <FiX className="h-4 w-4" />
+                </button>
+              )}
             </div>
             {tasks.map((task) => (
               <div
@@ -223,6 +257,37 @@ export default function UploadManager({
               </div>
             ))}
           </div>
+        )}
+
+        {tasks.length > 0 && isMinimized && (
+          <button
+            onClick={() => setIsMinimized(false)}
+            className="fixed right-6 bottom-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-xl ring-1 ring-gray-200 transition-transform hover:scale-105 dark:bg-gray-900 dark:ring-gray-800"
+          >
+            <svg
+              className="absolute inset-0 h-full w-full -rotate-90 transform"
+              viewBox="0 0 36 36"
+            >
+              <path
+                className="text-gray-100 dark:text-gray-800"
+                strokeWidth="3"
+                stroke="currentColor"
+                fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <path
+                className="text-gray-900 transition-all duration-300 dark:text-white"
+                strokeWidth="3"
+                strokeDasharray={`${totalProgress}, 100`}
+                stroke="currentColor"
+                fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+            </svg>
+            <span className="text-[10px] font-bold text-gray-900 dark:text-white">
+              {totalProgress}%
+            </span>
+          </button>
         )}
       </div>
     </UploadContext.Provider>

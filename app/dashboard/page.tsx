@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import EmptyState from './components/EmptyState';
 import UploadManager, { UploadButton } from './components/UploadManager';
 import FileCard from './components/FileCard';
-import Pagination from './components/Pagination';
 import FolderCard from './components/FolderCard';
 import { FiLoader, FiFilter, FiFolderPlus, FiChevronRight, FiHome, FiX } from 'react-icons/fi';
 
@@ -33,7 +32,12 @@ export default function Dashboard() {
   const [breadcrumbs, setBreadcrumbs] = useState<{ id: string; name: string }[]>([]);
 
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   const [counts, setCounts] = useState<{
     type: Record<string, number>;
@@ -61,33 +65,44 @@ export default function Dashboard() {
     }
   }, [currentFolderId]);
 
-  const fetchFiles = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: '12',
-        type,
-        privacy,
-      });
-      if (currentFolderId) {
-        params.append('folderId', currentFolderId);
+  const fetchFiles = useCallback(
+    async (pageNum: number) => {
+      const isLoadMore = pageNum > 1;
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
       }
 
-      const res = await fetch(`/api/files?${params.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setFiles(data.files);
-        setPagination(data.pagination);
-      } else {
-        if (res.status === 401) router.push('/login');
+      try {
+        const params = new URLSearchParams({
+          page: pageNum.toString(),
+          limit: '12',
+          type,
+          privacy,
+        });
+        if (currentFolderId) {
+          params.append('folderId', currentFolderId);
+        }
+
+        const res = await fetch(`/api/files?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setFiles((prev) => (isLoadMore ? [...prev, ...data.files] : data.files));
+          setTotalPages(data.pagination.totalPages);
+          setTotal(data.pagination.total);
+        } else {
+          if (res.status === 401) router.push('/login');
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination.page, type, privacy, currentFolderId, router]);
+    },
+    [type, privacy, currentFolderId, router]
+  );
 
   const fetchCounts = useCallback(async () => {
     try {
@@ -103,11 +118,39 @@ export default function Dashboard() {
     }
   }, [currentFolderId]);
 
+  // When filters or folder changes, reset page to 1
+  useEffect(() => {
+    setPage(1);
+  }, [type, privacy, currentFolderId]);
+
+  // Fetch files whenever page or dependencies (fetchFiles) change
+  useEffect(() => {
+    fetchFiles(page);
+  }, [page, fetchFiles]);
+
+  // Fetch folders and counts when their dependencies change
   useEffect(() => {
     fetchFolders();
-    fetchFiles();
     fetchCounts();
-  }, [fetchFolders, fetchFiles, fetchCounts]);
+  }, [fetchFolders, fetchCounts]);
+
+  // Intersection Observer for Infinite Scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && page < totalPages && !loading && !loadingMore) {
+          setPage((p) => p + 1);
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [page, totalPages, loading, loadingMore]);
 
   const handleCreateFolder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,7 +186,6 @@ export default function Dashboard() {
   const handleNavigateFolder = (folder: Folder) => {
     setCurrentFolderId(folder.id);
     setBreadcrumbs([...breadcrumbs, { id: folder.id, name: folder.name }]);
-    setPagination((p) => ({ ...p, page: 1 }));
   };
 
   const handleNavigateBreadcrumb = (index: number) => {
@@ -155,15 +197,13 @@ export default function Dashboard() {
       setCurrentFolderId(newBreadcrumbs[newBreadcrumbs.length - 1].id);
       setBreadcrumbs(newBreadcrumbs);
     }
-    setPagination((p) => ({ ...p, page: 1 }));
   };
 
   const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/files/${id}`, { method: 'DELETE' });
       if (res.ok) {
-        setFiles(files.filter((f) => f.id !== id));
-        fetchFiles();
+        setFiles((prev) => prev.filter((f) => f.id !== id));
         fetchCounts();
       }
     } catch (err) {
@@ -182,7 +222,7 @@ export default function Dashboard() {
         const updated = await res.json();
         setFiles(files.map((f) => (f.id === id ? updated : f)));
         if (privacy !== 'all') {
-          fetchFiles();
+          fetchFiles(page);
         }
       }
     } catch (err) {
@@ -223,8 +263,8 @@ export default function Dashboard() {
     <UploadManager
       folderId={currentFolderId}
       onUploadComplete={() => {
-        setPagination((p) => ({ ...p, page: 1 }));
-        fetchFiles();
+        if (page === 1) fetchFiles(1);
+        else setPage(1);
         fetchCounts();
       }}
     >
@@ -280,10 +320,7 @@ export default function Dashboard() {
                     return (
                       <button
                         key={opt.value}
-                        onClick={() => {
-                          setType(opt.value);
-                          setPagination((p) => ({ ...p, page: 1 }));
-                        }}
+                        onClick={() => setType(opt.value)}
                         className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
                           isSelected
                             ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm dark:border-white dark:bg-white dark:text-zinc-900'
@@ -316,10 +353,7 @@ export default function Dashboard() {
                     return (
                       <button
                         key={opt.value}
-                        onClick={() => {
-                          setPrivacy(opt.value);
-                          setPagination((p) => ({ ...p, page: 1 }));
-                        }}
+                        onClick={() => setPrivacy(opt.value)}
                         className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
                           isSelected
                             ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm dark:border-white dark:bg-white dark:text-zinc-900'
@@ -385,7 +419,6 @@ export default function Dashboard() {
                 onResetFilters={() => {
                   setType('all');
                   setPrivacy('all');
-                  setPagination((p) => ({ ...p, page: 1 }));
                 }}
               />
             ) : files.length > 0 ? (
@@ -401,12 +434,22 @@ export default function Dashboard() {
                     />
                   ))}
                 </div>
-                <div className="mt-8">
-                  <Pagination
-                    currentPage={pagination.page}
-                    totalPages={pagination.totalPages}
-                    onPageChange={(page) => setPagination((p) => ({ ...p, page }))}
-                  />
+
+                {/* Infinite Scroll Observer Target & Loader */}
+                <div
+                  ref={observerTarget}
+                  className="mt-8 flex w-full flex-col items-center justify-center py-6"
+                >
+                  {loadingMore ? (
+                    <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+                      <FiLoader className="h-4 w-4 animate-spin" />
+                      Loading more...
+                    </div>
+                  ) : page >= totalPages ? (
+                    <div className="text-sm text-zinc-400 dark:text-zinc-600">
+                      You've reached the end.
+                    </div>
+                  ) : null}
                 </div>
               </>
             ) : (
