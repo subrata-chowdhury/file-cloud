@@ -77,7 +77,7 @@ export default function FileDetailsDrawer({
       >
         <FileDrawerHeader onClose={onClose} />
 
-        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+        <div className="custom-scrollbar flex-1 overflow-y-auto p-4">
           <FileDrawerPreview name={file.name} url={file.url} mimeType={file.mimeType} />
 
           <FileDrawerInfo file={file} onRename={onRename} readOnly={readOnly} />
@@ -90,14 +90,16 @@ export default function FileDetailsDrawer({
             readOnly={readOnly}
           />
 
-          <div className="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800/60">
-            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+          <div className="mt-6 border-t border-zinc-100 pt-4 dark:border-zinc-800/60">
+            <h4 className="mb-3 text-xs font-semibold tracking-wider text-zinc-500 uppercase dark:text-zinc-400">
               Details
             </h4>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-zinc-500 dark:text-zinc-400">Type</span>
-                <span className="font-medium text-zinc-900 dark:text-zinc-100">{file.mimeType}</span>
+                <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                  {file.mimeType}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-500 dark:text-zinc-400">Size</span>

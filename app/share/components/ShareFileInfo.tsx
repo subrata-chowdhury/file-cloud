@@ -31,11 +31,13 @@ export default function ShareFileInfo({ name, size, mimeType, ownerName }: Share
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <h1 className="break-all text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+        <h1 className="text-3xl font-bold tracking-tight break-all text-zinc-900 dark:text-white">
           {name}
         </h1>
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-          <span className="rounded-full bg-zinc-100 px-3 py-1 dark:bg-zinc-800/80">{formatSize(size)}</span>
+          <span className="rounded-full bg-zinc-100 px-3 py-1 dark:bg-zinc-800/80">
+            {formatSize(size)}
+          </span>
           <span className="text-zinc-300 dark:text-zinc-700">•</span>
           <span>Shared by {ownerName || 'a user'}</span>
         </div>

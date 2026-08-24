@@ -24,7 +24,7 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   const [sharedUsers, setSharedUsers] = useState<SharedUser[]>([]);
   const [isLoadingShared, setIsLoadingShared] = useState(false);
   const [isProcessingId, setIsProcessingId] = useState<string | null>(null);
@@ -121,7 +121,9 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm dark:bg-black/60">
       <div className="w-full max-w-md rounded-2xl border border-transparent bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/50">
         <div className="flex items-center justify-between border-b border-zinc-100 p-4 dark:border-zinc-800/60">
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Share "{fileName}"</h3>
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+            Share "{fileName}"
+          </h3>
           <button
             onClick={onClose}
             className="rounded-full p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
@@ -139,7 +141,7 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
                 placeholder="Search users by name or email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pr-4 pl-9 text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-400 focus:bg-white focus:ring-4 focus:ring-zinc-400/10 dark:border-zinc-800/60 dark:bg-zinc-900/50 dark:text-white dark:focus:border-zinc-600 dark:focus:bg-zinc-950"
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pr-4 pl-9 text-sm text-zinc-900 transition-colors outline-none focus:border-zinc-400 focus:bg-white focus:ring-4 focus:ring-zinc-400/10 dark:border-zinc-800/60 dark:bg-zinc-900/50 dark:text-white dark:focus:border-zinc-600 dark:focus:bg-zinc-950"
               />
               {isSearching && (
                 <div className="absolute right-3">
@@ -149,7 +151,7 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
             </div>
 
             {searchResults.length > 0 && (
-              <div className="absolute left-0 top-full mt-2 w-full overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-900 z-10">
+              <div className="absolute top-full left-0 z-10 mt-2 w-full overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
                 <ul className="max-h-60 overflow-y-auto p-1">
                   {searchResults.map((u) => {
                     const isAlreadyShared = sharedUsers.some((su) => su.id === u.id);
@@ -160,7 +162,7 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
                           disabled={isAlreadyShared || isProcessingId === u.id}
                           className="flex w-full items-center justify-between rounded-lg p-2 text-left transition-colors hover:bg-zinc-50 disabled:opacity-50 dark:hover:bg-zinc-800/50"
                         >
-                          <div className="flex flex-col min-w-0">
+                          <div className="flex min-w-0 flex-col">
                             <span className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
                               {u.name || 'Unnamed User'}
                             </span>
@@ -189,10 +191,10 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
           </div>
 
           <div>
-            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            <h4 className="mb-3 text-xs font-semibold tracking-wider text-zinc-500 uppercase dark:text-zinc-400">
               People with access
             </h4>
-            
+
             {isLoadingShared ? (
               <div className="flex items-center justify-center py-6">
                 <FiLoader className="h-5 w-5 animate-spin text-zinc-400" />

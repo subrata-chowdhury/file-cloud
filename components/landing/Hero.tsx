@@ -13,9 +13,9 @@ export default function Hero() {
           <div className="mb-8 flex justify-center">
             <div className="relative flex items-center gap-2 rounded-full border border-zinc-200/50 bg-white/60 px-4 py-1.5 text-xs font-medium text-zinc-600 shadow-sm backdrop-blur-md transition-all hover:bg-white/80 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-900/60 dark:text-zinc-400 dark:hover:bg-zinc-900/80">
               <span className="flex h-2 w-2 rounded-full bg-zinc-900 dark:bg-white"></span>
-              FileCloud 2.0 is now available
+              FileCloud 3.0 is now available
               <Link
-                href="/register"
+                href="/changelog"
                 className="ml-2 flex items-center gap-1 font-semibold text-zinc-900 dark:text-white"
               >
                 <span className="absolute inset-0" aria-hidden="true" />

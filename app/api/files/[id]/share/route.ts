@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     if (fileRes.rowCount === 0) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 });
     }
-    
+
     // Allow if they are the owner
     const isOwner = fileRes.rows[0].ownerId === userId;
     if (!isOwner) {
@@ -100,10 +100,7 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Forbidden or not found' }, { status: 403 });
     }
 
-    await query(
-      `DELETE FROM "FileShare" WHERE "fileId" = $1 AND "userId" = $2`,
-      [fileId, userId]
-    );
+    await query(`DELETE FROM "FileShare" WHERE "fileId" = $1 AND "userId" = $2`, [fileId, userId]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

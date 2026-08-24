@@ -66,7 +66,6 @@ export default function Sidebar() {
 
   const percentageUsed = Math.min(100, (stats.totalBytes / MAX_BYTES) * 100);
 
-
   return (
     <>
       {/* Mobile Sidebar Overlay */}

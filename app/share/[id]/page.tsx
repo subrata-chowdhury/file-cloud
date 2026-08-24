@@ -63,18 +63,14 @@ export default function SharePage({ params }: { params: Promise<{ id: string }> 
       <main className="flex flex-1 items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
         <div className="w-full max-w-4xl overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900/50">
           <div className="p-6 sm:p-10">
-            <ShareFileInfo 
-              name={file.name} 
-              size={file.size} 
-              mimeType={file.mimeType} 
-              ownerName={file.owner?.name} 
+            <ShareFileInfo
+              name={file.name}
+              size={file.size}
+              mimeType={file.mimeType}
+              ownerName={file.owner?.name}
             />
 
-            <ShareFilePreview 
-              name={file.name} 
-              url={file.url} 
-              mimeType={file.mimeType} 
-            />
+            <ShareFilePreview name={file.name} url={file.url} mimeType={file.mimeType} />
 
             <div className="flex justify-end">
               <a
@@ -84,7 +80,7 @@ export default function SharePage({ params }: { params: Promise<{ id: string }> 
                 rel="noopener noreferrer"
                 className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 px-6 py-4 text-sm font-medium text-white transition-all hover:bg-zinc-800 sm:w-auto dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
               >
-                <FiDownload className="h-5 w-5 transition-transform group-hover:-translate-y-0.5" /> 
+                <FiDownload className="h-5 w-5 transition-transform group-hover:-translate-y-0.5" />
                 Download File
               </a>
             </div>

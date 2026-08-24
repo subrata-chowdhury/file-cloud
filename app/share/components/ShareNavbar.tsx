@@ -10,7 +10,9 @@ export default function ShareNavbar() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 dark:bg-white">
               <FiCloud className="h-5 w-5 text-white dark:text-zinc-900" />
             </div>
-            <span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">FileCloud</span>
+            <span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">
+              FileCloud
+            </span>
           </Link>
         </div>
       </div>

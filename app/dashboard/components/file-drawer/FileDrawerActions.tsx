@@ -89,7 +89,7 @@ export default function FileDrawerActions({
               </div>
             </div>
             <span
-              className={`rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+              className={`rounded px-2 py-0.5 text-xs font-semibold tracking-wider uppercase transition-colors ${
                 file.isPublic
                   ? 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:group-hover:bg-emerald-500/20'
                   : 'bg-zinc-100 text-zinc-500 group-hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:group-hover:bg-zinc-700'
@@ -123,7 +123,7 @@ export default function FileDrawerActions({
           </button>
         </div>
       )}
-      
+
       {file && (
         <ShareModal
           isOpen={isShareModalOpen}

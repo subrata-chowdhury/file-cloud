@@ -64,9 +64,7 @@ export default function SharedWithMePage() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-500/20">
             <FiUsers className="h-8 w-8 text-blue-600 dark:text-blue-400" />
           </div>
-          <h2 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white">
-            No shared files
-          </h2>
+          <h2 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white">No shared files</h2>
           <p className="max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
             When someone shares a file with you, it will appear here.
           </p>
@@ -74,7 +72,7 @@ export default function SharedWithMePage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {files.map((file) => (
-            <div key={file.id} className="relative group">
+            <div key={file.id} className="group relative">
               <FileCard
                 file={file}
                 onSelect={() => handleSelectFile(file)}
@@ -83,7 +81,7 @@ export default function SharedWithMePage() {
                 onRename={undefined} // Dummy, button will be hidden by readOnly
                 readOnly={true}
               />
-              <div className="absolute top-2 left-2 z-10 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white text-[10px] font-medium px-2 py-1 rounded backdrop-blur-sm shadow pointer-events-none">
+              <div className="pointer-events-none absolute top-2 left-2 z-10 rounded bg-black/60 px-2 py-1 text-[10px] font-medium text-white opacity-100 shadow backdrop-blur-sm transition-opacity group-hover:opacity-100 sm:opacity-0">
                 Shared by {file.ownerName || file.ownerEmail}
               </div>
             </div>

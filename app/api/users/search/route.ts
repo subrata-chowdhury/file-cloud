@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     }
 
     const searchStr = `%${q.trim()}%`;
-    
+
     const result = await query(
       `SELECT id, name, email FROM "User" 
        WHERE id != $1 AND (email ILIKE $2 OR name ILIKE $2)
