@@ -28,11 +28,10 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Delete from Cloudinary
-    await cloudinary.uploader.destroy(file.publicId);
-
     // Delete from DB
-    await query('DELETE FROM "File" WHERE id = $1', [fileId]);
+    await query('UPDATE "File" SET "isTrashed" = true, "updatedAt" = NOW() WHERE id = $1', [
+      fileId,
+    ]);
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -12,6 +12,7 @@ import {
   FiDatabase,
   FiFile,
   FiX,
+  FiTrash2,
 } from 'react-icons/fi';
 import { useMobileMenu } from '../context/MobileMenuContext';
 
@@ -98,7 +99,7 @@ export default function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1.5 overflow-y-auto px-4 py-6">
+        <nav className="flex h-full flex-1 flex-col space-y-1.5 overflow-y-auto px-4 py-6 pb-0">
           <p className="mb-2 px-3 text-xs font-medium tracking-wider text-zinc-400 uppercase dark:text-zinc-500">
             Overview
           </p>
@@ -125,6 +126,23 @@ export default function Sidebar() {
               </Link>
             );
           })}
+          <Link
+            href={'/dashboard/trash'}
+            className={`group mt-auto flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+              pathname === '/dashboard/trash'
+                ? 'bg-zinc-100 text-zinc-900 shadow-sm ring-1 ring-zinc-200/50 dark:bg-zinc-800 dark:text-white dark:ring-zinc-700/50'
+                : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-200'
+            }`}
+          >
+            <FiTrash2
+              className={`mr-3 h-4 w-4 flex-shrink-0 transition-colors ${
+                pathname === '/dashboard/trash'
+                  ? 'text-zinc-900 dark:text-white'
+                  : 'text-zinc-400 group-hover:text-zinc-500 dark:group-hover:text-zinc-300'
+              }`}
+            />
+            Trash Bin
+          </Link>
         </nav>
 
         {/* Bottom Section: Stats */}

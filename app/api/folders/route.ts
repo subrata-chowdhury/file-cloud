@@ -38,13 +38,13 @@ export async function GET(req: NextRequest) {
     let rows;
     if (parentId) {
       const res = await query(
-        `SELECT * FROM "Folder" WHERE "ownerId" = $1 AND "parentId" = $2 ORDER BY "name" ASC`,
+        `SELECT * FROM "Folder" WHERE "ownerId" = $1 AND "parentId" = $2 AND "isTrashed" = false ORDER BY "name" ASC`,
         [userId, parentId]
       );
       rows = res.rows;
     } else {
       const res = await query(
-        `SELECT * FROM "Folder" WHERE "ownerId" = $1 AND "parentId" IS NULL ORDER BY "name" ASC`,
+        `SELECT * FROM "Folder" WHERE "ownerId" = $1 AND "parentId" IS NULL AND "isTrashed" = false ORDER BY "name" ASC`,
         [userId]
       );
       rows = res.rows;

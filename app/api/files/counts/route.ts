@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const folderId = searchParams.get('folderId');
 
-    const conditions: string[] = ['"ownerId" = $1'];
+    const conditions: string[] = ['"ownerId" = $1', '"isTrashed" = false'];
     const params: unknown[] = [userId];
 
     if (folderId) {

@@ -66,35 +66,27 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       [folderIds]
     );
 
-    // 3. Delete files from Cloudinary
-    if (filesToDelete.length > 0) {
-      const publicIds = filesToDelete.map((f) => f.publicId);
-      // Delete from Cloudinary concurrently
-      await Promise.all(
-        publicIds.map((pid) =>
-          cloudinary.uploader.destroy(pid).catch((err) => {
-            console.error('Failed to delete from Cloudinary:', pid, err);
-          })
-        )
+    // 3. Mark files as trashed
+    if (folderIds.length > 0) {
+      await query(
+        `UPDATE "File" SET "isTrashed" = true, "updatedAt" = NOW() WHERE "folderId" = ANY($1::text[])`,
+        [folderIds]
       );
-
-      // Explicitly delete the files from the database just in case the ON DELETE CASCADE constraint isn't active
-      await query(`DELETE FROM "File" WHERE "folderId" = ANY($1::text[])`, [folderIds]);
     }
 
-    // 4. Delete the root folder from DB. ON DELETE CASCADE will handle the rest of the DB rows.
-    const { rowCount } = await query(`DELETE FROM "Folder" WHERE id = $1 AND "ownerId" = $2`, [
-      id,
-      userId,
-    ]);
+    // 4. Mark the root folder and all nested folders as trashed
+    const { rowCount } = await query(
+      `UPDATE "Folder" SET "isTrashed" = true, "updatedAt" = NOW() WHERE id = ANY($1::text[]) AND "ownerId" = $2`,
+      [folderIds, userId]
+    );
 
     if (rowCount === 0) {
       return NextResponse.json({ error: 'Folder not found or unauthorized' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Folder deleted successfully' });
+    return NextResponse.json({ message: 'Folder moved to trash' });
   } catch (error) {
-    console.error('Delete folder error:', error);
+    console.error('Trash folder error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
