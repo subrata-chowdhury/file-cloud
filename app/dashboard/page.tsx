@@ -6,6 +6,7 @@ import EmptyState from './components/EmptyState';
 import UploadManager, { UploadButton } from './components/UploadManager';
 import FileCard from './components/FileCard';
 import FolderCard from './components/FolderCard';
+import FileDetailsDrawer from './components/FileDetailsDrawer';
 import { FiLoader, FiFilter, FiFolderPlus, FiChevronRight, FiHome, FiX } from 'react-icons/fi';
 
 interface StoredFile {
@@ -30,6 +31,8 @@ export default function Dashboard() {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<{ id: string; name: string }[]>([]);
+
+  const [selectedFile, setSelectedFile] = useState<StoredFile | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -205,6 +208,9 @@ export default function Dashboard() {
       if (res.ok) {
         setFiles((prev) => prev.filter((f) => f.id !== id));
         fetchCounts();
+        if (selectedFile?.id === id) {
+          setSelectedFile(null);
+        }
       }
     } catch (err) {
       console.error('Delete failed:', err);
@@ -221,6 +227,9 @@ export default function Dashboard() {
       if (res.ok) {
         const updated = await res.json();
         setFiles(files.map((f) => (f.id === id ? updated : f)));
+        if (selectedFile?.id === id) {
+          setSelectedFile(updated);
+        }
         if (privacy !== 'all') {
           fetchFiles(page);
         }
@@ -240,6 +249,9 @@ export default function Dashboard() {
       if (res.ok) {
         const updated = await res.json();
         setFiles(files.map((f) => (f.id === id ? updated : f)));
+        if (selectedFile?.id === id) {
+          setSelectedFile(updated);
+        }
       }
     } catch (err) {
       console.error('Rename failed:', err);
@@ -431,6 +443,7 @@ export default function Dashboard() {
                       onDelete={handleDelete}
                       onTogglePrivacy={handleTogglePrivacy}
                       onRename={handleRename}
+                      onSelect={(f) => setSelectedFile(f)}
                     />
                   ))}
                 </div>
@@ -516,6 +529,15 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+
+      <FileDetailsDrawer
+        file={selectedFile}
+        isOpen={!!selectedFile}
+        onClose={() => setSelectedFile(null)}
+        onDelete={handleDelete}
+        onTogglePrivacy={handleTogglePrivacy}
+        onRename={handleRename}
+      />
     </UploadManager>
   );
 }
