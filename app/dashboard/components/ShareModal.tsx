@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FiX, FiSearch, FiUserPlus, FiLoader, FiUserMinus } from 'react-icons/fi';
 
 interface User {
@@ -21,6 +22,7 @@ interface ShareModalProps {
 }
 
 export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -28,6 +30,10 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
   const [sharedUsers, setSharedUsers] = useState<SharedUser[]>([]);
   const [isLoadingShared, setIsLoadingShared] = useState(false);
   const [isProcessingId, setIsProcessingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen && fileId) {
@@ -115,9 +121,9 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm dark:bg-black/60">
       <div className="w-full max-w-md rounded-2xl border border-transparent bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/50">
         <div className="flex items-center justify-between border-b border-zinc-100 p-4 dark:border-zinc-800/60">
@@ -242,6 +248,7 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
