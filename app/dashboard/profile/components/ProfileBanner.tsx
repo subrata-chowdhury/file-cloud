@@ -18,29 +18,32 @@ export default function ProfileBanner({ name, email }: ProfileBannerProps) {
   };
 
   return (
-    <>
-      <div className="relative h-48 w-full overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-lg">
-        {/* Abstract shapes for premium feel */}
-        <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
-        <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
-      </div>
+    <div className="mb-8 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+      {/* Cover Area */}
+      <div className="h-24 bg-zinc-100 sm:h-32 dark:bg-zinc-900/50"></div>
 
-      <div className="relative mb-10 px-4 sm:px-10">
-        <div className="relative -mt-16 flex flex-col items-center sm:flex-row sm:items-end sm:gap-6">
-          <div className="h-32 w-32 shrink-0 rounded-3xl bg-white p-2 shadow-xl ring-1 ring-gray-900/5">
-            <div className="flex h-full w-full items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-4xl font-black text-white shadow-inner">
+      {/* Content Area */}
+      <div className="px-6 pb-6 sm:px-8">
+        <div className="relative -mt-12 flex flex-col sm:-mt-16 sm:flex-row sm:items-end sm:gap-6">
+          {/* Avatar */}
+          <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-white p-1.5 shadow-sm ring-1 ring-zinc-200 sm:h-32 sm:w-32 dark:bg-zinc-950 dark:ring-zinc-800">
+            <div className="flex h-full w-full items-center justify-center rounded-xl bg-zinc-100 text-3xl font-bold text-zinc-900 dark:bg-zinc-900 dark:text-white">
               {getInitials(name)}
             </div>
           </div>
-          <div className="mt-4 flex-1 text-center sm:mt-0 sm:pb-3 sm:text-left">
-            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">{name}</h1>
-            <p className="mt-1 flex items-center justify-center gap-2 text-sm font-medium text-gray-500 sm:justify-start">
+
+          {/* Text Info */}
+          <div className="mt-4 flex-1 sm:mt-0 sm:pb-2">
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-white">
+              {name}
+            </h1>
+            <p className="mt-1 flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
               <FiMail className="h-4 w-4" />
               {email}
             </p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

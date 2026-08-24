@@ -90,7 +90,7 @@ export default function ProfilePage() {
   if (!profile) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-100 border-t-indigo-600"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900 dark:border-zinc-800 dark:border-t-white"></div>
       </div>
     );
   }
@@ -101,7 +101,7 @@ export default function ProfilePage() {
 
       {message && (
         <div
-          className={`mb-8 flex items-center gap-3 rounded-2xl p-4 text-sm font-semibold shadow-sm ${message.type === 'error' ? 'border border-red-100 bg-red-50 text-red-700' : 'border border-green-100 bg-green-50 text-green-700'}`}
+          className={`mb-8 flex items-center gap-3 rounded-xl p-4 text-sm font-medium shadow-sm ${message.type === 'error' ? 'border border-red-200/50 bg-red-50 text-red-600 dark:border-red-900/30 dark:bg-red-900/10 dark:text-red-400' : 'border border-green-200/50 bg-green-50 text-green-700 dark:border-green-900/30 dark:bg-green-900/10 dark:text-green-400'}`}
         >
           {message.type === 'error' ? (
             <FiAlertCircle className="h-5 w-5" />
