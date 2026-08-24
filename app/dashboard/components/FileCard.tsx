@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FiGlobe, FiLock } from 'react-icons/fi';
+import { FiGlobe, FiLock, FiStar } from 'react-icons/fi';
 import RenameModal from './RenameModal';
 import FileIconPreview from './file-card/FileIconPreview';
 import FileCardMenu from './file-card/FileCardMenu';
@@ -13,6 +13,7 @@ export interface FileData {
   size: number;
   mimeType: string;
   isPublic: boolean;
+  isFavorite?: boolean;
   createdAt: string;
 }
 
@@ -21,6 +22,7 @@ interface FileCardProps {
   onDelete: (id: string) => Promise<void> | void;
   onTogglePrivacy: (id: string, isPublic: boolean) => void;
   onRename?: (id: string, name: string) => Promise<void> | void;
+  onToggleFavorite?: (id: string, isFavorite: boolean) => Promise<void> | void;
   onSelect?: (file: FileData) => void;
   readOnly?: boolean;
 }
@@ -30,6 +32,7 @@ export default function FileCard({
   onDelete,
   onTogglePrivacy,
   onRename,
+  onToggleFavorite,
   onSelect,
   readOnly = false,
 }: FileCardProps) {
@@ -75,7 +78,14 @@ export default function FileCard({
             }
           }}
         >
-          <FileIconPreview name={file.name} url={file.url} mimeType={file.mimeType} />
+          <div className="relative">
+            <FileIconPreview name={file.name} url={file.url} mimeType={file.mimeType} />
+            {file.isFavorite && (
+              <div className="absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/50">
+                <FiStar className="h-2.5 w-2.5 fill-yellow-500 text-yellow-500" />
+              </div>
+            )}
+          </div>
 
           <div className="min-w-0 flex-1 pt-0.5 pr-5">
             <p
@@ -109,6 +119,9 @@ export default function FileCard({
           file={file}
           onDelete={handleDelete}
           onTogglePrivacy={() => onTogglePrivacy(file.id, !file.isPublic)}
+          onToggleFavorite={
+            onToggleFavorite ? () => onToggleFavorite(file.id, !file.isFavorite) : undefined
+          }
           onRename={
             onRename
               ? () => {

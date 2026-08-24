@@ -11,6 +11,7 @@ export interface FileDetails {
   size: number;
   mimeType: string;
   isPublic: boolean;
+  isFavorite?: boolean;
   createdAt: string;
 }
 
@@ -21,6 +22,7 @@ interface FileDetailsDrawerProps {
   onDelete: (id: string) => Promise<void> | void;
   onTogglePrivacy: (id: string, isPublic: boolean) => void;
   onRename?: (id: string, name: string) => Promise<void> | void;
+  onToggleFavorite?: (id: string, isFavorite: boolean) => Promise<void> | void;
   readOnly?: boolean;
 }
 
@@ -31,6 +33,7 @@ export default function FileDetailsDrawer({
   onDelete,
   onTogglePrivacy,
   onRename,
+  onToggleFavorite,
   readOnly = false,
 }: FileDetailsDrawerProps) {
   useEffect(() => {
@@ -86,6 +89,7 @@ export default function FileDetailsDrawer({
             file={file}
             onDelete={onDelete}
             onTogglePrivacy={onTogglePrivacy}
+            onToggleFavorite={onToggleFavorite}
             onClose={onClose}
             readOnly={readOnly}
           />

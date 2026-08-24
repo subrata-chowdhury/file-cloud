@@ -7,6 +7,7 @@ import {
   FiLink,
   FiTrash2,
   FiLoader,
+  FiStar,
 } from 'react-icons/fi';
 import ShareModal from '../ShareModal';
 import { FileDetails } from '../FileDetailsDrawer';
@@ -15,6 +16,7 @@ interface FileDrawerActionsProps {
   file: FileDetails;
   onDelete: (id: string) => Promise<void> | void;
   onTogglePrivacy: (id: string, isPublic: boolean) => void;
+  onToggleFavorite?: (id: string, isFavorite: boolean) => Promise<void> | void;
   onClose: () => void;
   readOnly?: boolean;
 }
@@ -23,6 +25,7 @@ export default function FileDrawerActions({
   file,
   onDelete,
   onTogglePrivacy,
+  onToggleFavorite,
   onClose,
   readOnly = false,
 }: FileDrawerActionsProps) {
@@ -71,6 +74,34 @@ export default function FileDrawerActions({
 
       {!readOnly && (
         <div className="space-y-1">
+          {onToggleFavorite && (
+            <button
+              onClick={() => onToggleFavorite(file.id, !file.isFavorite)}
+              className="group flex w-full items-center justify-between rounded-xl p-3 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            >
+              <div className="flex items-center gap-3">
+                <FiStar
+                  className={`h-4 w-4 ${file.isFavorite ? 'fill-yellow-500 text-yellow-500' : 'text-zinc-400'}`}
+                />
+                <div className="flex flex-col items-start leading-tight">
+                  <span>Favorites</span>
+                  <span className="mt-0.5 text-xs font-normal text-zinc-500 dark:text-zinc-400">
+                    Click to {file.isFavorite ? 'remove' : 'add'}
+                  </span>
+                </div>
+              </div>
+              <span
+                className={`rounded px-2 py-0.5 text-xs font-semibold tracking-wider uppercase transition-colors ${
+                  file.isFavorite
+                    ? 'bg-yellow-50 text-yellow-600 group-hover:bg-yellow-100 dark:bg-yellow-500/10 dark:text-yellow-500 dark:group-hover:bg-yellow-500/20'
+                    : 'bg-zinc-100 text-zinc-500 group-hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:group-hover:bg-zinc-700'
+                }`}
+              >
+                {file.isFavorite ? 'Starred' : 'None'}
+              </span>
+            </button>
+          )}
+
           <button
             onClick={() => onTogglePrivacy(file.id, !file.isPublic)}
             className="group flex w-full items-center justify-between rounded-xl p-3 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"

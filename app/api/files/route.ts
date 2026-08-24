@@ -17,18 +17,29 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get('type') || 'all';
     const privacy = searchParams.get('privacy') || 'all';
     const folderId = searchParams.get('folderId');
+    const isFavorite = searchParams.get('isFavorite');
 
     const conditions: string[] = ['"ownerId" = $1', '"isTrashed" = false'];
     const params: unknown[] = [userId];
     let paramIndex = 2;
 
-    if (folderId) {
-      conditions.push(`"folderId" = $${paramIndex}`);
-      params.push(folderId);
-      paramIndex++;
-    } else if (!search) {
-      // Only restrict to root if not searching globally
-      conditions.push(`"folderId" IS NULL`);
+    if (isFavorite === 'true') {
+      conditions.push(`"isFavorite" = true`);
+      // When fetching favorites, we don't scope by folder unless explicitly provided
+      if (folderId) {
+        conditions.push(`"folderId" = $${paramIndex}`);
+        params.push(folderId);
+        paramIndex++;
+      }
+    } else {
+      if (folderId) {
+        conditions.push(`"folderId" = $${paramIndex}`);
+        params.push(folderId);
+        paramIndex++;
+      } else if (!search) {
+        // Only restrict to root if not searching globally and not fetching favorites
+        conditions.push(`"folderId" IS NULL`);
+      }
     }
 
     if (search) {

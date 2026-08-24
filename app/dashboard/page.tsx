@@ -16,6 +16,7 @@ interface StoredFile {
   size: number;
   mimeType: string;
   isPublic: boolean;
+  isFavorite?: boolean;
   createdAt: string;
 }
 
@@ -24,6 +25,7 @@ interface Folder {
   name: string;
   parentId: string | null;
   createdAt: string;
+  isFavorite?: boolean;
 }
 
 export default function Dashboard() {
@@ -239,6 +241,43 @@ export default function Dashboard() {
     }
   };
 
+  const handleToggleFileFavorite = async (id: string, isFavorite: boolean) => {
+    try {
+      const res = await fetch(`/api/files/${id}/favorite`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFavorite }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setFiles(files.map((f) => (f.id === id ? { ...f, isFavorite: updated.isFavorite } : f)));
+        if (selectedFile?.id === id) {
+          setSelectedFile((prev) => (prev ? { ...prev, isFavorite: updated.isFavorite } : null));
+        }
+      }
+    } catch (err) {
+      console.error('Favorite toggle failed:', err);
+    }
+  };
+
+  const handleToggleFolderFavorite = async (id: string, isFavorite: boolean) => {
+    try {
+      const res = await fetch(`/api/folders/${id}/favorite`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFavorite }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setFolders(
+          folders.map((f) => (f.id === id ? { ...f, isFavorite: updated.isFavorite } : f))
+        );
+      }
+    } catch (err) {
+      console.error('Folder favorite toggle failed:', err);
+    }
+  };
+
   const handleRename = async (id: string, name: string) => {
     try {
       const res = await fetch(`/api/files/${id}`, {
@@ -400,6 +439,7 @@ export default function Dashboard() {
                     folder={folder}
                     onClick={() => handleNavigateFolder(folder)}
                     onDelete={handleDeleteFolder}
+                    onToggleFavorite={handleToggleFolderFavorite}
                   />
                 ))}
               </div>
@@ -442,6 +482,7 @@ export default function Dashboard() {
                       file={file}
                       onDelete={handleDelete}
                       onTogglePrivacy={handleTogglePrivacy}
+                      onToggleFavorite={handleToggleFileFavorite}
                       onRename={handleRename}
                       onSelect={(f) => setSelectedFile(f)}
                     />
@@ -536,6 +577,7 @@ export default function Dashboard() {
         onClose={() => setSelectedFile(null)}
         onDelete={handleDelete}
         onTogglePrivacy={handleTogglePrivacy}
+        onToggleFavorite={handleToggleFileFavorite}
         onRename={handleRename}
       />
     </UploadManager>

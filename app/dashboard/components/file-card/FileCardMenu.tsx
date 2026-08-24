@@ -8,6 +8,7 @@ import {
   FiExternalLink,
   FiLoader,
   FiEdit2,
+  FiStar,
 } from 'react-icons/fi';
 import { FileData } from '../FileCard';
 
@@ -16,6 +17,7 @@ interface FileCardMenuProps {
   onDelete: () => Promise<void> | void;
   onTogglePrivacy: () => void;
   onRename?: () => void;
+  onToggleFavorite?: () => void;
   readOnly?: boolean;
 }
 
@@ -24,6 +26,7 @@ export default function FileCardMenu({
   onDelete,
   onTogglePrivacy,
   onRename,
+  onToggleFavorite,
   readOnly = false,
 }: FileCardMenuProps) {
   const [showMenu, setShowMenu] = useState(false);
@@ -99,6 +102,20 @@ export default function FileCardMenu({
             >
               <FiExternalLink className="mr-2 h-3.5 w-3.5 text-zinc-400" /> Open File
             </a>
+            {!readOnly && onToggleFavorite && (
+              <button
+                onClick={() => {
+                  onToggleFavorite();
+                  setShowMenu(false);
+                }}
+                className="flex w-full items-center rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800/50"
+              >
+                <FiStar
+                  className={`mr-2 h-3.5 w-3.5 ${file.isFavorite ? 'fill-yellow-500 text-yellow-500' : 'text-zinc-400'}`}
+                />
+                {file.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+              </button>
+            )}
             {!readOnly && (
               <button
                 onClick={() => {

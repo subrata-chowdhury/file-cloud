@@ -27,8 +27,8 @@ interface Stats {
 
 const navLinks = [
   { name: 'My Files', href: '/dashboard', icon: FiHome },
-  { name: 'Shared with me', href: '/dashboard/shared', icon: FiUsers },
   { name: 'Favorites', href: '/dashboard/favorites', icon: FiStar },
+  { name: 'Shared with me', href: '/dashboard/shared', icon: FiUsers },
   { name: 'Settings', href: '/dashboard/settings', icon: FiSettings },
 ];
 

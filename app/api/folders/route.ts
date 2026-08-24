@@ -34,9 +34,17 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const parentId = searchParams.get('parentId');
+    const isFavorite = searchParams.get('isFavorite');
 
     let rows;
-    if (parentId) {
+    if (isFavorite === 'true') {
+      // Fetch all favorite folders regardless of nesting
+      const res = await query(
+        `SELECT * FROM "Folder" WHERE "ownerId" = $1 AND "isFavorite" = true AND "isTrashed" = false ORDER BY "name" ASC`,
+        [userId]
+      );
+      rows = res.rows;
+    } else if (parentId) {
       const res = await query(
         `SELECT * FROM "Folder" WHERE "ownerId" = $1 AND "parentId" = $2 AND "isTrashed" = false ORDER BY "name" ASC`,
         [userId, parentId]

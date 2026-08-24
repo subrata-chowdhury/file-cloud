@@ -42,9 +42,6 @@ export default function SharedWithMePage() {
   return (
     <div className="flex h-full flex-col p-6">
       <div className="mb-8 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
-          <FiUsers className="h-5 w-5" />
-        </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
             Shared with Me
