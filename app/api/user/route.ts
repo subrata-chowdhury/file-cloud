@@ -61,47 +61,86 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  try {
-    const userId = getUserIdFromRequest(req);
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // 1. Fetch all files owned by user
-    const { rows: files } = await query(`SELECT "publicId" FROM "File" WHERE "ownerId" = $1`, [
-      userId,
-    ]);
-
-    // 2. Delete from Cloudinary
-    if (files.length > 0) {
-      const { v2: cloudinary } = await import('cloudinary');
-      cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
-      });
-      const publicIds = files.map((f) => f.publicId);
-      await Promise.all(
-        publicIds.map((pid) => cloudinary.uploader.destroy(pid).catch(console.error))
-      );
-    }
-
-    // 3. Delete files, folders, and notifications from DB explicitly
-    await query(`DELETE FROM "File" WHERE "ownerId" = $1`, [userId]);
-    await query(`DELETE FROM "Folder" WHERE "ownerId" = $1`, [userId]);
-    await query(`DELETE FROM "Notification" WHERE "userId" = $1`, [userId]);
-
-    // 4. Finally delete the user
-    await query(`DELETE FROM "User" WHERE id = $1`, [userId]);
-
-    // 5. Clear the auth cookie
-    const { cookies } = await import('next/headers');
-    const cookieStore = await cookies();
-    cookieStore.delete('auth-token');
-
-    return NextResponse.json({ success: true, message: 'Account deleted successfully' });
-  } catch (error) {
-    console.error('Delete user error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  const userId = getUserIdFromRequest(req);
+  if (!userId) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
   }
+
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const sendEvent = (data: any) => {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+      };
+
+      try {
+        sendEvent({ progress: 0, total: 100, message: 'Fetching files...' });
+
+        // 1. Fetch all files owned by user
+        const { rows: files } = await query(`SELECT "publicId" FROM "File" WHERE "ownerId" = $1`, [
+          userId,
+        ]);
+        const total = files.length;
+
+        // 2. Delete from Cloudinary in batches
+        if (total > 0) {
+          const { v2: cloudinary } = await import('cloudinary');
+          cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+          });
+
+          const publicIds = files.map((f) => f.publicId);
+          const BATCH_SIZE = 10;
+          let deletedCount = 0;
+
+          for (let i = 0; i < publicIds.length; i += BATCH_SIZE) {
+            const batch = publicIds.slice(i, i + BATCH_SIZE);
+            await Promise.all(
+              batch.map((pid) => cloudinary.uploader.destroy(pid).catch(console.error))
+            );
+            deletedCount += batch.length;
+            sendEvent({
+              progress: deletedCount,
+              total,
+              message: `Deleted ${deletedCount} of ${total} files...`,
+            });
+          }
+        } else {
+          sendEvent({ progress: 100, total: 100, message: 'No files to delete...' });
+        }
+
+        sendEvent({ progress: total, total, message: 'Cleaning up database...' });
+
+        // 3. Delete files, folders, and notifications from DB explicitly
+        await query(`DELETE FROM "File" WHERE "ownerId" = $1`, [userId]);
+        await query(`DELETE FROM "Folder" WHERE "ownerId" = $1`, [userId]);
+        await query(`DELETE FROM "Notification" WHERE "userId" = $1`, [userId]);
+
+        // 4. Finally delete the user
+        await query(`DELETE FROM "User" WHERE id = $1`, [userId]);
+
+        // 5. Clear the auth cookie
+        const { cookies } = await import('next/headers');
+        const cookieStore = await cookies();
+        cookieStore.delete('auth-token');
+
+        sendEvent({ progress: total, total, message: 'Account deleted successfully', done: true });
+        controller.close();
+      } catch (error) {
+        console.error('Delete user error:', error);
+        sendEvent({ error: 'Internal server error', done: true });
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+    },
+  });
 }
