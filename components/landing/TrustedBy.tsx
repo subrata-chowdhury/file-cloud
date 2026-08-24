@@ -1,51 +1,75 @@
+import { BsSlack } from 'react-icons/bs';
+import { SiVercel, SiNotion, SiFigma, SiStripe, SiGithub } from 'react-icons/si';
+
 export default function TrustedBy() {
+  const logos = [
+    <div
+      key="1"
+      className="flex items-center gap-2 text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white"
+    >
+      <SiVercel className="h-7 w-7" />
+      <span className="text-lg font-semibold tracking-tight">Vercel</span>
+    </div>,
+    <div
+      key="2"
+      className="flex items-center gap-2 text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white"
+    >
+      <SiNotion className="h-7 w-7" />
+      <span className="text-lg font-semibold tracking-tight">Notion</span>
+    </div>,
+    <div
+      key="3"
+      className="flex items-center gap-2 text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white"
+    >
+      <BsSlack className="h-7 w-7" />
+      <span className="text-lg font-semibold tracking-tight">Slack</span>
+    </div>,
+    <div
+      key="4"
+      className="flex items-center gap-2 text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white"
+    >
+      <SiFigma className="h-7 w-7" />
+      <span className="text-lg font-semibold tracking-tight">Figma</span>
+    </div>,
+    <div
+      key="5"
+      className="flex items-center gap-2 text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white"
+    >
+      <SiStripe className="h-7 w-7" />
+      <span className="text-lg font-semibold tracking-tight">Stripe</span>
+    </div>,
+    <div
+      key="6"
+      className="flex items-center gap-2 text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white"
+    >
+      <SiGithub className="h-7 w-7" />
+      <span className="text-lg font-semibold tracking-tight">GitHub</span>
+    </div>,
+  ];
+
   return (
-    <div className="bg-white py-12 sm:py-16">
+    <div className="bg-white py-12 sm:py-16 dark:bg-zinc-950">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <h2 className="mb-8 text-center text-sm leading-8 font-semibold tracking-widest text-gray-400 uppercase">
+        <h2 className="mb-8 text-center text-sm font-semibold tracking-widest text-zinc-500 uppercase dark:text-zinc-400">
           Trusted by the world's most innovative teams
         </h2>
 
         {/* Infinite Scroll Effect Container */}
         <div className="relative flex overflow-hidden">
           {/* Gradient Masks for smooth fade on edges */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-white to-transparent"></div>
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-white to-transparent"></div>
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-white to-transparent dark:from-zinc-950"></div>
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-white to-transparent dark:from-zinc-950"></div>
 
-          <div className="flex w-full items-center justify-around gap-12 opacity-50 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0 sm:gap-20">
-            {/* Logos */}
-            <svg className="h-8 text-gray-900 sm:h-10" viewBox="0 0 100 30" fill="currentColor">
-              <rect width="10" height="30" rx="2" />
-              <circle cx="30" cy="15" r="10" />
-              <rect x="50" width="30" height="10" rx="2" />
-              <rect x="50" y="20" width="30" height="10" rx="2" />
-            </svg>
-            <svg className="h-8 text-gray-900 sm:h-10" viewBox="0 0 100 30" fill="currentColor">
-              <path d="M10,30 L20,0 L30,30 Z" />
-              <circle cx="50" cy="15" r="12" />
-              <rect x="70" y="5" width="20" height="20" rx="4" />
-            </svg>
-            <svg className="h-8 text-gray-900 sm:h-10" viewBox="0 0 100 30" fill="currentColor">
-              <circle cx="15" cy="15" r="15" />
-              <rect x="40" y="5" width="40" height="20" rx="10" />
-            </svg>
-            <svg
-              className="hidden h-8 text-gray-900 sm:h-10 md:block"
-              viewBox="0 0 100 30"
-              fill="currentColor"
-            >
-              <rect width="20" height="20" rx="4" transform="rotate(45 10 10)" />
-              <path d="M40,5 L80,5 L80,25 L40,25 Z" />
-            </svg>
-            <svg
-              className="hidden h-8 text-gray-900 sm:h-10 lg:block"
-              viewBox="0 0 100 30"
-              fill="currentColor"
-            >
-              <circle cx="15" cy="15" r="10" />
-              <circle cx="30" cy="15" r="10" />
-              <circle cx="45" cy="15" r="10" />
-            </svg>
+          {/* Marquee track */}
+          <div className="flex w-max animate-[marquee_30s_linear_infinite] items-center justify-around gap-12 pl-12 hover:[animation-play-state:paused] sm:gap-24 sm:pl-24">
+            {[...logos, ...logos, ...logos].map((logo, idx) => (
+              <div
+                key={idx}
+                className="flex-shrink-0 opacity-50 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0 dark:opacity-40 dark:hover:opacity-100"
+              >
+                {logo}
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { FiCloud } from 'react-icons/fi';
 
 export default function Header() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/20 bg-white/60 shadow-[0_4px_30px_rgba(0,0,0,0.02)] backdrop-blur-xl transition-all">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/40 bg-white/50 shadow-sm backdrop-blur-2xl transition-all dark:border-zinc-800/40 dark:bg-zinc-950/50">
       <nav
         className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8"
         aria-label="Global"
@@ -11,12 +11,12 @@ export default function Header() {
         <div className="flex lg:flex-1">
           <Link
             href="/"
-            className="-m-1.5 flex items-center space-x-2 p-1.5 text-blue-600 transition-transform hover:scale-105"
+            className="-m-1.5 flex items-center space-x-2 p-1.5 transition-transform hover:scale-105"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-sm">
-              <FiCloud className="h-6 w-6" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-sm ring-1 ring-zinc-900/10 dark:bg-white dark:text-zinc-900 dark:ring-white/10">
+              <FiCloud className="h-5 w-5" />
             </div>
-            <span className="font-display text-xl font-extrabold tracking-tight text-gray-900">
+            <span className="font-display text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
               FileCloud
             </span>
           </Link>
@@ -24,13 +24,13 @@ export default function Header() {
         <div className="flex flex-1 items-center justify-end space-x-8">
           <Link
             href="/login"
-            className="text-sm leading-6 font-bold text-gray-600 transition-colors hover:text-gray-900"
+            className="text-sm font-semibold text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
           >
             Log in
           </Link>
           <Link
             href="/register"
-            className="rounded-full bg-gray-900 px-6 py-2.5 text-sm font-bold text-white shadow-sm ring-1 ring-gray-900/10 transition-all hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+            className="rounded-full bg-zinc-900 px-5 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-zinc-900/10 transition-all hover:bg-zinc-800 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 dark:focus-visible:outline-white"
           >
             Sign up
           </Link>

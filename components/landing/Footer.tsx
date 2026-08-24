@@ -3,26 +3,46 @@ import { FiCloud, FiTwitter, FiGithub, FiLinkedin, FiArrowRight } from 'react-ic
 
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-100 bg-white" aria-labelledby="footer-heading">
+    <footer
+      className="border-t border-zinc-100 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+      aria-labelledby="footer-heading"
+    >
       <h2 id="footer-heading" className="sr-only">
         Footer
       </h2>
 
       {/* Strong Final CTA */}
-      <div className="border-b border-gray-100 bg-gray-50/50 py-16">
-        <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
-          <h3 className="font-display text-3xl font-extrabold tracking-tight text-gray-900">
+      <div className="relative overflow-hidden border-b border-zinc-100 bg-gradient-to-br from-zinc-900 via-zinc-900 to-indigo-950 py-24 sm:py-32 dark:border-zinc-800 dark:from-black dark:via-zinc-950 dark:to-indigo-950">
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+        <div className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/2 blur-[100px]">
+          <div className="h-96 w-96 rounded-full bg-indigo-500/20"></div>
+        </div>
+        <div className="absolute bottom-0 left-0 -translate-x-1/3 translate-y-1/2 blur-[100px]">
+          <div className="h-96 w-96 rounded-full bg-blue-500/20"></div>
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-6 text-center lg:px-8">
+          <h3 className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
             Ready to streamline your workflow?
           </h3>
-          <p className="mt-4 text-lg text-gray-600">
-            Join thousands of users who trust FileCloud with their data.
+          <p className="mx-auto mt-6 max-w-xl text-lg text-zinc-300 dark:text-zinc-400">
+            Join thousands of users who trust FileCloud with their data. Start for free, upgrade
+            when you need to.
           </p>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-10 flex items-center justify-center gap-x-6">
             <Link
               href="/register"
-              className="flex items-center gap-2 rounded-full bg-gray-900 px-8 py-3.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-xl hover:shadow-gray-900/20"
+              className="group flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-zinc-900 shadow-sm transition-all hover:bg-zinc-100 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              Create your free account <FiArrowRight className="h-4 w-4" />
+              Create free account{' '}
+              <FiArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+            <Link
+              href="/pricing"
+              className="text-sm leading-6 font-semibold text-white transition-colors hover:text-zinc-300"
+            >
+              View pricing <span aria-hidden="true">→</span>
             </Link>
           </div>
         </div>
@@ -31,28 +51,40 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div className="space-y-8 xl:col-span-1">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-sm">
+            <Link
+              href="/"
+              className="flex items-center space-x-2 transition-opacity hover:opacity-80"
+            >
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-sm ring-1 ring-zinc-900/10 dark:bg-white dark:text-zinc-900 dark:ring-white/10">
                 <FiCloud className="h-5 w-5" />
               </div>
-              <span className="font-display text-xl font-extrabold tracking-tight text-gray-900">
+              <span className="font-display text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
                 FileCloud
               </span>
             </Link>
-            <p className="max-w-xs text-sm leading-6 text-gray-600">
+            <p className="max-w-xs text-sm leading-6 text-zinc-500 dark:text-zinc-400">
               Making cloud storage simple, secure, and accessible for everyone. Your data, your
               rules.
             </p>
             <div className="flex space-x-6">
-              <a href="#" className="text-gray-400 transition-colors hover:text-blue-500">
+              <a
+                href="#"
+                className="text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white"
+              >
                 <span className="sr-only">Twitter</span>
                 <FiTwitter className="h-5 w-5" aria-hidden="true" />
               </a>
-              <a href="#" className="text-gray-400 transition-colors hover:text-gray-900">
+              <a
+                href="#"
+                className="text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white"
+              >
                 <span className="sr-only">GitHub</span>
                 <FiGithub className="h-5 w-5" aria-hidden="true" />
               </a>
-              <a href="#" className="text-gray-400 transition-colors hover:text-blue-700">
+              <a
+                href="#"
+                className="text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white"
+              >
                 <span className="sr-only">LinkedIn</span>
                 <FiLinkedin className="h-5 w-5" aria-hidden="true" />
               </a>
@@ -61,12 +93,12 @@ export default function Footer() {
           <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
-                <h3 className="text-sm leading-6 font-bold text-gray-900">Product</h3>
-                <ul role="list" className="mt-6 space-y-4">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Product</h3>
+                <ul role="list" className="mt-6 space-y-2">
                   <li>
                     <a
                       href="#"
-                      className="text-sm leading-6 text-gray-500 transition-colors hover:text-blue-600"
+                      className="text-sm leading-6 text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                     >
                       Features
                     </a>
@@ -74,7 +106,7 @@ export default function Footer() {
                   <li>
                     <a
                       href="#"
-                      className="text-sm leading-6 text-gray-500 transition-colors hover:text-blue-600"
+                      className="text-sm leading-6 text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                     >
                       Integrations
                     </a>
@@ -82,7 +114,7 @@ export default function Footer() {
                   <li>
                     <a
                       href="#"
-                      className="text-sm leading-6 text-gray-500 transition-colors hover:text-blue-600"
+                      className="text-sm leading-6 text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                     >
                       Pricing
                     </a>
@@ -90,12 +122,12 @@ export default function Footer() {
                 </ul>
               </div>
               <div className="mt-10 md:mt-0">
-                <h3 className="text-sm leading-6 font-bold text-gray-900">Support</h3>
-                <ul role="list" className="mt-6 space-y-4">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Support</h3>
+                <ul role="list" className="mt-6 space-y-2">
                   <li>
                     <a
                       href="#"
-                      className="text-sm leading-6 text-gray-500 transition-colors hover:text-blue-600"
+                      className="text-sm leading-6 text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                     >
                       Documentation
                     </a>
@@ -103,7 +135,7 @@ export default function Footer() {
                   <li>
                     <a
                       href="#"
-                      className="text-sm leading-6 text-gray-500 transition-colors hover:text-blue-600"
+                      className="text-sm leading-6 text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                     >
                       Guides
                     </a>
@@ -111,7 +143,7 @@ export default function Footer() {
                   <li>
                     <a
                       href="#"
-                      className="text-sm leading-6 text-gray-500 transition-colors hover:text-blue-600"
+                      className="text-sm leading-6 text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                     >
                       API Status
                     </a>
@@ -121,12 +153,12 @@ export default function Footer() {
             </div>
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
-                <h3 className="text-sm leading-6 font-bold text-gray-900">Company</h3>
-                <ul role="list" className="mt-6 space-y-4">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Company</h3>
+                <ul role="list" className="mt-6 space-y-2">
                   <li>
                     <a
                       href="#"
-                      className="text-sm leading-6 text-gray-500 transition-colors hover:text-blue-600"
+                      className="text-sm leading-6 text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                     >
                       About
                     </a>
@@ -134,7 +166,7 @@ export default function Footer() {
                   <li>
                     <a
                       href="#"
-                      className="text-sm leading-6 text-gray-500 transition-colors hover:text-blue-600"
+                      className="text-sm leading-6 text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                     >
                       Blog
                     </a>
@@ -142,7 +174,7 @@ export default function Footer() {
                   <li>
                     <a
                       href="#"
-                      className="text-sm leading-6 text-gray-500 transition-colors hover:text-blue-600"
+                      className="text-sm leading-6 text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                     >
                       Careers
                     </a>
@@ -150,12 +182,12 @@ export default function Footer() {
                 </ul>
               </div>
               <div className="mt-10 md:mt-0">
-                <h3 className="text-sm leading-6 font-bold text-gray-900">Legal</h3>
-                <ul role="list" className="mt-6 space-y-4">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Legal</h3>
+                <ul role="list" className="mt-6 space-y-2">
                   <li>
                     <a
                       href="#"
-                      className="text-sm leading-6 text-gray-500 transition-colors hover:text-blue-600"
+                      className="text-sm leading-6 text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                     >
                       Privacy Policy
                     </a>
@@ -163,7 +195,7 @@ export default function Footer() {
                   <li>
                     <a
                       href="#"
-                      className="text-sm leading-6 text-gray-500 transition-colors hover:text-blue-600"
+                      className="text-sm leading-6 text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                     >
                       Terms of Service
                     </a>
@@ -173,16 +205,20 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-gray-100 pt-8 sm:mt-20 md:flex-row">
-          <p className="text-xs leading-5 text-gray-400">
+        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-zinc-100 pt-8 sm:mt-20 md:flex-row dark:border-zinc-800">
+          <p className="text-xs leading-5 text-zinc-400 dark:text-zinc-500">
             &copy; {new Date().getFullYear()} FileCloud, Inc. All rights reserved.
           </p>
-          <div className="flex items-center gap-2 text-xs text-gray-400">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
-            </span>
-            All systems operational
+          <div className="flex items-center gap-4 text-xs font-medium text-zinc-400 dark:text-zinc-500">
+            <a href="#" className="transition-colors hover:text-zinc-900 dark:hover:text-white">
+              Privacy
+            </a>
+            <a href="#" className="transition-colors hover:text-zinc-900 dark:hover:text-white">
+              Terms
+            </a>
+            <a href="#" className="transition-colors hover:text-zinc-900 dark:hover:text-white">
+              Cookies
+            </a>
           </div>
         </div>
       </div>
