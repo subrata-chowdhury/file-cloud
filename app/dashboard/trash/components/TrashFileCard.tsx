@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FiFile, FiVideo, FiRefreshCcw, FiTrash2, FiLoader } from 'react-icons/fi';
+import { FiCornerUpLeft, FiTrash2, FiLoader } from 'react-icons/fi';
+import FileIconPreview from '../../components/file-card/FileIconPreview';
 
 export interface TrashedFile {
   id: string;
@@ -14,90 +15,102 @@ interface TrashFileCardProps {
   file: TrashedFile;
   onRestore: (id: string) => Promise<void>;
   onHardDelete: (id: string) => Promise<void>;
+  onSelect?: (file: TrashedFile) => void;
 }
 
-export default function TrashFileCard({ file, onRestore, onHardDelete }: TrashFileCardProps) {
+export default function TrashFileCard({
+  file,
+  onRestore,
+  onHardDelete,
+  onSelect,
+}: TrashFileCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
 
-  const isImage = file.mimeType.startsWith('image/');
-  const isVideo = file.mimeType.startsWith('video/');
-
-  const getThumbnailUrl = (url: string) => {
-    if (!url.includes('/upload/')) return url;
-    return url.replace('/upload/', '/upload/w_200,h_200,c_fill,q_auto,f_auto/');
-  };
-
   const formatSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) return '0 Bytes';
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleRestore = async () => {
+  const handleRestore = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsRestoring(true);
     await onRestore(file.id);
   };
 
-  const handleHardDelete = async () => {
+  const handleHardDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsDeleting(true);
     await onHardDelete(file.id);
   };
 
   return (
     <div
-      className={`flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-colors hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 ${
+      onClick={() => onSelect?.(file)}
+      className={`group relative cursor-pointer overflow-visible rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-200 hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 ${
         isDeleting || isRestoring ? 'pointer-events-none opacity-50' : ''
       }`}
     >
-      <div className="flex items-center gap-3 overflow-hidden">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
-          {isImage ? (
-            <img
-              src={getThumbnailUrl(file.url)}
-              alt={file.name}
-              className="h-full w-full object-cover"
-            />
-          ) : isVideo ? (
-            <FiVideo className="h-5 w-5 text-zinc-500" />
-          ) : (
-            <FiFile className="h-5 w-5 text-zinc-500" />
-          )}
+      <div className="flex items-start gap-3 p-3">
+        <div className="relative">
+          <FileIconPreview
+            name={file.name}
+            url={file.url}
+            mimeType={file.mimeType}
+            viewMode="list"
+          />
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
-            {file.name}
-          </p>
-          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-            {formatSize(file.size)} • Trashed {new Date(file.updatedAt).toLocaleDateString()}
-          </p>
+
+        <div className="flex w-full min-w-0 flex-1 items-start justify-between pt-0.5">
+          <div className="min-w-0 flex-1 pr-2">
+            <p
+              className="truncate text-sm font-medium text-zinc-900 transition-colors dark:text-zinc-100"
+              title={file.name}
+            >
+              {file.name}
+            </p>
+            <div className="mt-1 flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-zinc-500 dark:text-zinc-400">
+              <span>{formatSize(file.size)}</span>
+              <span className="text-zinc-300 dark:text-zinc-700">•</span>
+              <span>
+                Trashed{' '}
+                {new Date(file.updatedAt).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </span>
+            </div>
+          </div>
+
+          <div className="relative flex shrink-0 items-center gap-1">
+            <button
+              onClick={handleRestore}
+              title="Restore"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+            >
+              {isRestoring ? (
+                <FiLoader className="h-4 w-4 animate-spin" />
+              ) : (
+                <FiCornerUpLeft className="h-4 w-4" />
+              )}
+            </button>
+            <button
+              onClick={handleHardDelete}
+              title="Delete Permanently"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 transition-all hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+            >
+              {isDeleting ? (
+                <FiLoader className="h-4 w-4 animate-spin" />
+              ) : (
+                <FiTrash2 className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <button
-          onClick={handleRestore}
-          title="Restore"
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-        >
-          {isRestoring ? (
-            <FiLoader className="h-4 w-4 animate-spin" />
-          ) : (
-            <FiRefreshCcw className="h-4 w-4" />
-          )}
-        </button>
-        <button
-          onClick={handleHardDelete}
-          title="Delete Permanently"
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-        >
-          {isDeleting ? (
-            <FiLoader className="h-4 w-4 animate-spin" />
-          ) : (
-            <FiTrash2 className="h-4 w-4" />
-          )}
-        </button>
       </div>
     </div>
   );

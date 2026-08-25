@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import FileCard, { FileData } from '../components/FileCard';
-import { FiLoader, FiUsers } from 'react-icons/fi';
+import { FiUsers } from 'react-icons/fi';
 import FileDetailsDrawer from '../components/FileDetailsDrawer';
 
 interface SharedFile extends FileData {
@@ -40,9 +40,9 @@ export default function SharedWithMePage() {
   };
 
   return (
-    <div className="flex h-full flex-col p-6">
-      <div className="mb-8 flex items-center gap-3">
-        <div>
+    <div className="flex h-full flex-col">
+      <div className="custom-scrollbar flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div className="mb-8">
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
             Shared with Me
           </h1>
@@ -50,47 +50,63 @@ export default function SharedWithMePage() {
             Files that others have shared with you.
           </p>
         </div>
-      </div>
 
-      {loading ? (
-        <div className="flex flex-1 items-center justify-center">
-          <FiLoader className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-        </div>
-      ) : files.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-300 bg-zinc-50/50 p-8 text-center dark:border-zinc-800 dark:bg-zinc-900/50">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-500/20">
-            <FiUsers className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-          </div>
-          <h2 className="mb-2 text-xl font-bold text-zinc-900 dark:text-white">No shared files</h2>
-          <p className="max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
-            When someone shares a file with you, it will appear here.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {files.map((file) => (
-            <div key={file.id} className="group relative">
-              <FileCard
-                file={file}
-                onSelect={() => handleSelectFile(file)}
-                onDelete={() => {}} // Dummy, button will be hidden by readOnly
-                onTogglePrivacy={() => {}} // Dummy, button will be hidden by readOnly
-                onRename={undefined} // Dummy, button will be hidden by readOnly
-                readOnly={true}
-              />
-              <div className="pointer-events-none absolute top-2 left-2 z-10 rounded bg-black/60 px-2 py-1 text-[10px] font-medium text-white opacity-100 shadow backdrop-blur-sm transition-opacity group-hover:opacity-100 sm:opacity-0">
-                Shared by {file.ownerName || file.ownerEmail}
+        {loading ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="relative flex items-start gap-3 rounded-xl border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+              >
+                <div className="h-10 w-10 shrink-0 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
+                <div className="flex flex-1 flex-col gap-2 pt-1">
+                  <div className="h-4 w-2/3 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
+                  <div className="flex gap-2">
+                    <div className="h-3 w-16 animate-pulse rounded bg-zinc-100 dark:bg-zinc-800/50" />
+                    <div className="h-3 w-12 animate-pulse rounded bg-zinc-100 dark:bg-zinc-800/50" />
+                  </div>
+                </div>
               </div>
+            ))}
+          </div>
+        ) : files.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+              <FiUsers className="h-8 w-8 text-blue-500" />
             </div>
-          ))}
-        </div>
-      )}
+            <h3 className="mb-1 text-lg font-semibold text-zinc-900 dark:text-white">
+              No shared files
+            </h3>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              When someone shares a file with you, it will appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {files.map((file) => (
+              <div key={file.id} className="group relative">
+                <FileCard
+                  file={file}
+                  onSelect={() => handleSelectFile(file)}
+                  onDelete={() => {}} // Dummy, button will be hidden by readOnly
+                  onTogglePrivacy={() => {}} // Dummy, button will be hidden by readOnly
+                  onRename={undefined} // Dummy, button will be hidden by readOnly
+                  readOnly={true}
+                />
+                <div className="pointer-events-none absolute top-2 left-2 z-10 rounded bg-black/60 px-2 py-1 text-[10px] font-medium text-white opacity-100 shadow backdrop-blur-sm transition-opacity group-hover:opacity-100 sm:opacity-0">
+                  Shared by {file.ownerName || file.ownerEmail}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <FileDetailsDrawer
         file={selectedFile}
         isOpen={!!selectedFile}
         onClose={() => setSelectedFile(null)}
-        onDelete={() => {}} // Dummy, button will be hidden by readOnly
+        onDelete={() => {}}
         onTogglePrivacy={() => {}}
         readOnly={true}
       />
