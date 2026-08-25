@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
 
     const fileRow = rows[0];
 
-    if (!fileRow.isPublic) {
+    if (!fileRow.isPublic && fileRow.ownerId !== userId) {
       return NextResponse.json({ error: 'This file is private' }, { status: 403 });
     }
 

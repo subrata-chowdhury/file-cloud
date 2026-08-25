@@ -52,7 +52,7 @@ export default function FileDrawerActions({
       {/* Quick Actions */}
       <div className="mb-6 grid grid-cols-2 gap-3">
         <a
-          href={file.url}
+          href={`/share/${file.id}`}
           target="_blank"
           rel="noopener noreferrer"
           className={`flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 ${readOnly ? 'col-span-2' : ''}`}
