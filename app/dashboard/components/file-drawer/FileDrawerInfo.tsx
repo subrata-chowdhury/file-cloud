@@ -78,7 +78,7 @@ export default function FileDrawerInfo({ file, onRename, readOnly = false }: Fil
           </div>
         ) : (
           <div className="group flex items-start justify-between gap-4">
-            <h3 className="text-lg font-semibold break-words text-zinc-900 dark:text-white">
+            <h3 className="text-lg font-semibold break-all text-zinc-900 dark:text-white">
               {file.name}
             </h3>
             {!readOnly && onRename && (
