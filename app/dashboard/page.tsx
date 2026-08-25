@@ -66,6 +66,18 @@ export default function Dashboard() {
   const [newFolderName, setNewFolderName] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
+  useEffect(() => {
+    const saved = localStorage.getItem('fileCloud_viewMode');
+    if (saved === 'list' || saved === 'grid') {
+      setViewMode(saved);
+    }
+  }, []);
+
+  const handleSetViewMode = (mode: 'list' | 'grid') => {
+    setViewMode(mode);
+    localStorage.setItem('fileCloud_viewMode', mode);
+  };
+
   const router = useRouter();
 
   const fetchFolders = useCallback(async () => {
@@ -446,7 +458,7 @@ export default function Dashboard() {
                 {/* View Toggle */}
                 <div className="flex items-center gap-1 rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-zinc-900">
                   <button
-                    onClick={() => setViewMode('list')}
+                    onClick={() => handleSetViewMode('list')}
                     className={`rounded-full p-1.5 transition-all ${
                       viewMode === 'list'
                         ? 'bg-zinc-100 text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-white'
@@ -457,7 +469,7 @@ export default function Dashboard() {
                     <FiList className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => setViewMode('grid')}
+                    onClick={() => handleSetViewMode('grid')}
                     className={`rounded-full p-1.5 transition-all ${
                       viewMode === 'grid'
                         ? 'bg-zinc-100 text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-white'
