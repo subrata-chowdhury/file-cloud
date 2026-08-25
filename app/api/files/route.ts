@@ -54,7 +54,9 @@ export async function GET(req: NextRequest) {
       } else if (type === 'video') {
         conditions.push(`("mimeType" LIKE 'video/%' OR "mimeType" IN ('mkv', 'mp4', 'webm'))`);
       } else if (type === 'document') {
-        conditions.push(`("mimeType" NOT LIKE 'image/%' AND "mimeType" NOT LIKE 'video/%' AND "mimeType" NOT IN ('mkv', 'mp4', 'webm'))`);
+        conditions.push(
+          `("mimeType" NOT LIKE 'image/%' AND "mimeType" NOT LIKE 'video/%' AND "mimeType" NOT IN ('mkv', 'mp4', 'webm'))`
+        );
       }
     }
 
