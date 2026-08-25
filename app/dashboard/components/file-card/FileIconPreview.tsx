@@ -17,13 +17,14 @@ export default function FileIconPreview({
   const isVideo =
     mimeType.startsWith('video/') ||
     ['mkv', 'mp4', 'webm', 'avi', 'mov', 'wmv', 'flv'].includes(mimeType.toLowerCase());
+  const isPdf = mimeType === 'application/pdf';
 
-  const getThumbnailUrl = (url: string, asVideo: boolean = false) => {
+  const getThumbnailUrl = (url: string, forceJpg: boolean = false) => {
     if (!url.includes('/upload/')) return url;
     let transformedUrl = url.replace('/upload/', '/upload/w_200,h_200,c_fill,q_auto,f_auto/');
 
-    // Cloudinary generates video thumbnails when requested with an image extension (.jpg)
-    if (asVideo) {
+    // Cloudinary generates video and PDF thumbnails when requested with an image extension (.jpg)
+    if (forceJpg) {
       const lastDotIndex = transformedUrl.lastIndexOf('.');
       if (lastDotIndex !== -1) {
         transformedUrl = transformedUrl.substring(0, lastDotIndex) + '.jpg';
@@ -58,6 +59,12 @@ export default function FileIconPreview({
               </div>
             </div>
           </>
+        ) : isPdf ? (
+          <img
+            src={getThumbnailUrl(url, true)}
+            alt={name}
+            className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
+          />
         ) : (
           <FiFile
             className={`${viewMode === 'grid' ? 'h-10 w-10' : 'h-5 w-5'} text-zinc-400 transition-colors group-hover:text-zinc-600 dark:group-hover:text-zinc-300`}
