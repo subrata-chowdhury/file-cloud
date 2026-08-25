@@ -28,8 +28,8 @@ export async function GET(req: NextRequest) {
       `SELECT
         COUNT(*) as total,
         COUNT(*) FILTER (WHERE "mimeType" LIKE 'image/%') as images,
-        COUNT(*) FILTER (WHERE "mimeType" LIKE 'video/%') as videos,
-        COUNT(*) FILTER (WHERE "mimeType" NOT LIKE 'image/%' AND "mimeType" NOT LIKE 'video/%') as documents,
+        COUNT(*) FILTER (WHERE "mimeType" LIKE 'video/%' OR "mimeType" IN ('mkv', 'mp4', 'webm')) as videos,
+        COUNT(*) FILTER (WHERE "mimeType" NOT LIKE 'image/%' AND "mimeType" NOT LIKE 'video/%' AND "mimeType" NOT IN ('mkv', 'mp4', 'webm')) as documents,
         COUNT(*) FILTER (WHERE "isPublic" = true) as public_files,
         COUNT(*) FILTER (WHERE "isPublic" = false) as private_files
        FROM "File" ${whereClause}`,

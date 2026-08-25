@@ -52,9 +52,9 @@ export async function GET(req: NextRequest) {
       if (type === 'image') {
         conditions.push(`"mimeType" LIKE 'image/%'`);
       } else if (type === 'video') {
-        conditions.push(`"mimeType" LIKE 'video/%'`);
+        conditions.push(`("mimeType" LIKE 'video/%' OR "mimeType" IN ('mkv', 'mp4', 'webm'))`);
       } else if (type === 'document') {
-        conditions.push(`"mimeType" NOT LIKE 'image/%' AND "mimeType" NOT LIKE 'video/%'`);
+        conditions.push(`("mimeType" NOT LIKE 'image/%' AND "mimeType" NOT LIKE 'video/%' AND "mimeType" NOT IN ('mkv', 'mp4', 'webm'))`);
       }
     }
 
