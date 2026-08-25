@@ -113,6 +113,15 @@ export async function DELETE(req: NextRequest) {
 
         sendEvent({ progress: total, total, message: 'Cleaning up database...' });
 
+        // Delete shares where user is recipient (shared with me)
+        await query(`DELETE FROM "FileShare" WHERE "userId" = $1`, [userId]);
+
+        // Delete shares for files owned by user
+        await query(
+          `DELETE FROM "FileShare" WHERE "fileId" IN (SELECT id FROM "File" WHERE "ownerId" = $1)`,
+          [userId]
+        );
+
         // 3. Delete files, folders, and notifications from DB explicitly
         await query(`DELETE FROM "File" WHERE "ownerId" = $1`, [userId]);
         await query(`DELETE FROM "Folder" WHERE "ownerId" = $1`, [userId]);

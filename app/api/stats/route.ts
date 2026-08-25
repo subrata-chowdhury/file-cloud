@@ -10,18 +10,19 @@ export async function GET(req: NextRequest) {
     }
 
     const { rows } = await query(
-      `SELECT COUNT(id) as "totalFiles", COALESCE(SUM(size), 0) as "totalBytes" FROM "File" WHERE "ownerId" = $1`,
+      `SELECT COUNT(id) as "totalFiles", COALESCE(SUM(size), 0) as "totalBytes", COALESCE(SUM(views), 0) as "totalViews" FROM "File" WHERE "ownerId" = $1 AND "isTrashed" = false`,
       [userId]
     );
 
     const { rows: folderRows } = await query(
-      `SELECT COUNT(id) as "totalFolders" FROM "Folder" WHERE "ownerId" = $1`,
+      `SELECT COUNT(id) as "totalFolders" FROM "Folder" WHERE "ownerId" = $1 AND "isTrashed" = false`,
       [userId]
     );
 
     const stats = {
       totalFiles: parseInt(rows[0].totalFiles, 10),
       totalBytes: parseInt(rows[0].totalBytes, 10),
+      totalViews: parseInt(rows[0].totalViews, 10),
       totalFolders: parseInt(folderRows[0].totalFolders, 10),
     };
 
