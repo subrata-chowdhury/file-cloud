@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { FiInfo } from 'react-icons/fi';
 import FileDrawerHeader from './file-drawer/FileDrawerHeader';
 import FileDrawerPreview from './file-drawer/FileDrawerPreview';
 import FileDrawerInfo from './file-drawer/FileDrawerInfo';
@@ -13,6 +14,8 @@ export interface FileDetails {
   isPublic: boolean;
   isFavorite?: boolean;
   createdAt: string;
+  views?: number;
+  downloads?: number;
 }
 
 interface FileDetailsDrawerProps {
@@ -63,6 +66,13 @@ export default function FileDetailsDrawer({
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatIndianNumber = (num: number) => {
+    if (num < 1000) return num.toString();
+    if (num < 100000) return (num / 1000).toFixed(num % 1000 !== 0 ? 1 : 0) + 'K';
+    if (num < 10000000) return (num / 100000).toFixed(num % 100000 !== 0 ? 1 : 0) + 'L';
+    return (num / 10000000).toFixed(num % 10000000 !== 0 ? 1 : 0) + 'Cr';
   };
 
   return (
@@ -121,6 +131,32 @@ export default function FileDetailsDrawer({
                   })}
                 </span>
               </div>
+              {(file.views !== undefined || file.downloads !== undefined) && (
+                <>
+                  {file.views !== undefined && (
+                    <div className="group relative flex items-center justify-between">
+                      <span className="flex cursor-help items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
+                        Views
+                        <FiInfo className="h-3.5 w-3.5" />
+                        <div className="pointer-events-none absolute bottom-full left-0 z-50 mb-2 w-48 rounded bg-zinc-800 p-2 text-xs text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                          Views from the owner are not counted.
+                        </div>
+                      </span>
+                      <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                        {formatIndianNumber(file.views)}
+                      </span>
+                    </div>
+                  )}
+                  {file.downloads !== undefined && (
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500 dark:text-zinc-400">Downloads</span>
+                      <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                        {formatIndianNumber(file.downloads)}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -15,6 +15,8 @@ interface StoredFile {
   mimeType: string;
   isPublic: boolean;
   createdAt: string;
+  views?: number;
+  downloads?: number;
   owner?: { name: string };
 }
 
@@ -57,34 +59,44 @@ export default function SharePage({ params }: { params: Promise<{ id: string }> 
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-black">
       <ShareNavbar />
 
-      <main className="flex flex-1 items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
-        <div className="w-full max-w-4xl overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900/50">
-          <div className="p-6 sm:p-10">
-            <ShareFileInfo
-              name={file.name}
-              size={file.size}
-              mimeType={file.mimeType}
-              ownerName={file.owner?.name}
-            />
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:flex-row lg:items-start lg:gap-16 lg:py-16">
+        {/* Left Column: File Details and Actions */}
+        <div className="flex w-full flex-col lg:sticky lg:top-32 lg:max-w-sm">
+          <ShareFileInfo
+            name={file.name}
+            size={file.size}
+            mimeType={file.mimeType}
+            ownerName={file.owner?.name}
+            views={file.views}
+            downloads={file.downloads}
+            createdAt={file.createdAt}
+          />
 
-            <ShareFilePreview name={file.name} url={file.url} mimeType={file.mimeType} />
-
-            <div className="flex justify-end">
-              <a
-                href={file.url}
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 px-6 py-4 text-sm font-medium text-white transition-all hover:bg-zinc-800 sm:w-auto dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
-              >
-                <FiDownload className="h-5 w-5 transition-transform group-hover:-translate-y-0.5" />
-                Download File
-              </a>
-            </div>
+          <div className="mt-8 flex flex-col gap-3">
+            <a
+              href={file.url}
+              download
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                fetch(`/api/share/${unwrappedParams.id}/track-download`, { method: 'POST' }).catch(
+                  console.error
+                );
+              }}
+              className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-zinc-900 px-6 py-4 text-sm font-semibold text-white shadow-xl shadow-zinc-900/20 transition-all hover:-translate-y-0.5 hover:bg-zinc-800 hover:shadow-zinc-900/30 active:translate-y-0 dark:bg-white dark:text-zinc-900 dark:shadow-white/10 dark:hover:bg-zinc-100"
+            >
+              <FiDownload className="h-5 w-5 transition-transform group-hover:-translate-y-1" />
+              Download File
+            </a>
           </div>
+        </div>
+
+        {/* Right Column: Preview */}
+        <div className="mt-12 w-full flex-1 lg:mt-0">
+          <ShareFilePreview name={file.name} url={file.url} mimeType={file.mimeType} />
         </div>
       </main>
     </div>
