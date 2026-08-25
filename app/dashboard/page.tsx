@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import EmptyState from './components/EmptyState';
+import EmptyState from '../../components/ui/EmptyState';
 import UploadManager, { UploadButton } from './components/UploadManager';
 import FileCard from './components/FileCard';
 import FolderCard from './components/FolderCard';

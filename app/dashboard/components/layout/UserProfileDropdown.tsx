@@ -3,7 +3,7 @@
 import { FiLogOut, FiSettings, FiCreditCard, FiHelpCircle, FiUser } from 'react-icons/fi';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useUser } from '../context/UserContext';
+import { useUser } from '../../context/UserContext';
 
 export default function UserProfileDropdown() {
   const { user } = useUser();

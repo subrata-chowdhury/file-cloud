@@ -1,5 +1,5 @@
 import { FiFile, FiVideo } from 'react-icons/fi';
-import CustomVideoPlayer from '../../../share/components/CustomVideoPlayer';
+import CustomVideoPlayer from '../../../../components/ui/CustomVideoPlayer';
 
 interface FileDrawerPreviewProps {
   name: string;

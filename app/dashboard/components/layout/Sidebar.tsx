@@ -17,7 +17,7 @@ import {
   FiStar,
   FiUsers,
 } from 'react-icons/fi';
-import { useMobileMenu } from '../context/MobileMenuContext';
+import { useMobileMenu } from '../../context/MobileMenuContext';
 
 interface Stats {
   totalBytes: number;

@@ -5,7 +5,7 @@ import { FiStar } from 'react-icons/fi';
 import FileCard, { FileData } from '../components/FileCard';
 import FolderCard, { FolderData } from '../components/FolderCard';
 import FileDetailsDrawer, { FileDetails } from '../components/FileDetailsDrawer';
-import EmptyState from '../components/EmptyState';
+import EmptyState from '../../../components/ui/EmptyState';
 
 export default function FavoritesPage() {
   const [files, setFiles] = useState<FileData[]>([]);

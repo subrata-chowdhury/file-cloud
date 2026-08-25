@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import GlobalSearch from './GlobalSearch';
 import NotificationDropdown from './NotificationDropdown';
 import UserProfileDropdown from './UserProfileDropdown';
-import { useMobileMenu } from '../context/MobileMenuContext';
+import { useMobileMenu } from '../../context/MobileMenuContext';
 import { FiMenu } from 'react-icons/fi';
 
 export default function DashboardNav() {

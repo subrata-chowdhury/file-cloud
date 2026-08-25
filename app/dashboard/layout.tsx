@@ -1,5 +1,5 @@
-import DashboardNav from './components/DashboardNav';
-import Sidebar from './components/Sidebar';
+import DashboardNav from './components/layout/DashboardNav';
+import Sidebar from './components/layout/Sidebar';
 import { MobileMenuProvider } from './context/MobileMenuContext';
 import { UserProvider } from './context/UserContext';
 

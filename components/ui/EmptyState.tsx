@@ -1,5 +1,5 @@
 import { FiUploadCloud, FiFilter, FiFolderPlus, FiXCircle } from 'react-icons/fi';
-import { useUpload } from './UploadManager';
+import { useUpload } from '../../app/dashboard/components/UploadManager';
 
 interface EmptyStateProps {
   hasFilters?: boolean;

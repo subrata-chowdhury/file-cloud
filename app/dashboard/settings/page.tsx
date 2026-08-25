@@ -2,17 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import {
-  FiLogOut,
-  FiTrash2,
-  FiAlertTriangle,
-  FiUser,
-  FiShield,
-  FiCheckCircle,
-} from 'react-icons/fi';
-import ConfirmModal from '../components/ConfirmModal';
+import { FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
+import ConfirmModal from '../../../components/ui/ConfirmModal';
 import { useUser } from '../context/UserContext';
+
+import AccountOverview from './components/AccountOverview';
+import ProfileLinks from './components/ProfileLinks';
+import DangerZone from './components/DangerZone';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -26,15 +22,6 @@ export default function SettingsPage() {
   const [deleteProgress, setDeleteProgress] = useState(0);
   const [deleteTotal, setDeleteTotal] = useState(0);
   const [deleteMessage, setDeleteMessage] = useState('');
-
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      router.push('/login');
-    } catch (err) {
-      console.error('Logout failed', err);
-    }
-  };
 
   const processStream = async (res: Response, onSuccess: () => void) => {
     const reader = res.body?.getReader();
@@ -120,17 +107,6 @@ export default function SettingsPage() {
       setMessage({ type: 'error', text: 'An error occurred while deleting account.' });
       setIsDeleting(false);
     }
-  };
-
-  const getInitials = (name: string | null) => {
-    return name
-      ? name
-          .split(' ')
-          .map((n) => n[0])
-          .join('')
-          .substring(0, 2)
-          .toUpperCase()
-      : 'U';
   };
 
   if (!profile) {
@@ -226,121 +202,12 @@ export default function SettingsPage() {
       )}
 
       <div className="space-y-6">
-        {/* Account Overview */}
-        <div className="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950">
-          <div className="flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-5">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-900 text-xl font-medium text-white shadow-sm dark:bg-white dark:text-zinc-900">
-                {getInitials(profile.name)}
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-white">
-                  {profile.name}
-                </h2>
-                <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{profile.email}</p>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 focus:ring-2 focus:ring-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-            >
-              <FiLogOut className="h-4 w-4" />
-              Log Out
-            </button>
-          </div>
-        </div>
-
-        {/* Profile Links */}
-        <div className="overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950">
-          <div className="p-6 pb-2">
-            <h3 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-white">
-              Account Preferences
-            </h3>
-          </div>
-          <div className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
-            <Link
-              href="/dashboard/profile"
-              className="flex items-center gap-5 p-6 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
-            >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-zinc-50 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
-                <FiUser className="h-5 w-5 stroke-[1.5]" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-zinc-900 dark:text-white">
-                  Personal Information
-                </h4>
-                <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-                  Update your name and profile details.
-                </p>
-              </div>
-            </Link>
-            <Link
-              href="/dashboard/profile"
-              className="flex items-center gap-5 p-6 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
-            >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-zinc-50 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
-                <FiShield className="h-5 w-5 stroke-[1.5]" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-zinc-900 dark:text-white">
-                  Security & Password
-                </h4>
-                <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-                  Change your password and secure your account.
-                </p>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* Danger Zone */}
-        <div className="group relative overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm dark:border-red-900/30 dark:bg-zinc-950">
-          {/* Subtle red background glow on hover */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-red-50/30 to-white opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-red-900/10 dark:to-zinc-950"></div>
-
-          <div className="relative z-10 border-b border-red-100 bg-red-50/50 p-6 dark:border-red-900/30 dark:bg-red-900/5">
-            <h3 className="flex items-center gap-2 text-base font-semibold tracking-tight text-red-600 dark:text-red-500">
-              <FiAlertTriangle className="h-5 w-5" />
-              Danger Zone
-            </h3>
-          </div>
-          <div className="relative z-10 divide-y divide-red-50 dark:divide-red-900/20">
-            <div className="flex flex-col items-start justify-between gap-5 p-6 transition-colors hover:bg-red-50/20 sm:flex-row sm:items-center dark:hover:bg-red-900/10">
-              <div>
-                <h4 className="text-sm font-semibold text-zinc-900 dark:text-white">
-                  Delete All Data
-                </h4>
-                <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-                  Permanently delete all your files, folders, and storage data. This action is
-                  irreversible.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsDataModalOpen(true)}
-                className="shrink-0 rounded-xl border border-red-200 bg-white px-5 py-2.5 text-sm font-medium text-red-600 shadow-sm transition-all hover:border-red-300 hover:bg-red-50 hover:text-red-700 focus:ring-2 focus:ring-red-500/20 focus:outline-none dark:border-red-900/30 dark:bg-zinc-900 dark:text-red-500 dark:hover:border-red-800 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-              >
-                Delete All Data
-              </button>
-            </div>
-            <div className="flex flex-col items-start justify-between gap-5 p-6 transition-colors hover:bg-red-50/20 sm:flex-row sm:items-center dark:hover:bg-red-900/10">
-              <div>
-                <h4 className="text-sm font-semibold text-zinc-900 dark:text-white">
-                  Delete Account
-                </h4>
-                <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-                  Permanently delete your entire account along with all its data. You will
-                  immediately be logged out.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsAccountModalOpen(true)}
-                className="shrink-0 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-red-700 hover:shadow-md hover:shadow-red-500/20 focus:ring-2 focus:ring-red-500/20 focus:outline-none"
-              >
-                Delete Account
-              </button>
-            </div>
-          </div>
-        </div>
+        <AccountOverview />
+        <ProfileLinks />
+        <DangerZone
+          onDeleteData={() => setIsDataModalOpen(true)}
+          onDeleteAccount={() => setIsAccountModalOpen(true)}
+        />
       </div>
 
       <ConfirmModal
