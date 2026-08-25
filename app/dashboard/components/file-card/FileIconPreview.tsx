@@ -13,14 +13,10 @@ export default function FileIconPreview({
   mimeType,
   viewMode = 'list',
 }: FileIconPreviewProps) {
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
-  const videoExtensions = ['.mp4', '.webm', '.mkv', '.avi', '.mov', '.wmv', '.flv'];
-
-  const lowerName = name.toLowerCase();
-  const isImage =
-    mimeType.startsWith('image/') || imageExtensions.some((ext) => lowerName.endsWith(ext));
+  const isImage = mimeType.startsWith('image/');
   const isVideo =
-    mimeType.startsWith('video/') || videoExtensions.some((ext) => lowerName.endsWith(ext));
+    mimeType.startsWith('video/') ||
+    ['mkv', 'mp4', 'webm', 'avi', 'mov', 'wmv', 'flv'].includes(mimeType.toLowerCase());
 
   const getThumbnailUrl = (url: string, asVideo: boolean = false) => {
     if (!url.includes('/upload/')) return url;
