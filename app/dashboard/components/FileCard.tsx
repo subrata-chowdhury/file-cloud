@@ -25,6 +25,7 @@ interface FileCardProps {
   onToggleFavorite?: (id: string, isFavorite: boolean) => Promise<void> | void;
   onSelect?: (file: FileData) => void;
   readOnly?: boolean;
+  viewMode?: 'grid' | 'list';
 }
 
 export default function FileCard({
@@ -35,6 +36,7 @@ export default function FileCard({
   onToggleFavorite,
   onSelect,
   readOnly = false,
+  viewMode = 'list',
 }: FileCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
@@ -66,10 +68,10 @@ export default function FileCard({
   return (
     <>
       <div
-        className={`group relative overflow-visible rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-200 hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 ${isDeleting ? 'pointer-events-none opacity-50' : ''}`}
+        className={`group relative overflow-visible rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-200 hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 ${isDeleting ? 'pointer-events-none opacity-50' : ''} ${viewMode === 'grid' ? 'flex flex-col' : ''}`}
       >
         <div
-          className="flex cursor-pointer items-start gap-3 p-3"
+          className={`flex cursor-pointer ${viewMode === 'grid' ? 'flex-col gap-3 p-2' : 'items-start gap-3 p-3'}`}
           onClick={() => {
             if (onSelect) {
               onSelect(file);
@@ -78,8 +80,13 @@ export default function FileCard({
             }
           }}
         >
-          <div className="relative">
-            <FileIconPreview name={file.name} url={file.url} mimeType={file.mimeType} />
+          <div className={`relative ${viewMode === 'grid' ? 'aspect-square w-full' : ''}`}>
+            <FileIconPreview
+              name={file.name}
+              url={file.url}
+              mimeType={file.mimeType}
+              viewMode={viewMode}
+            />
             {file.isFavorite && (
               <div className="absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/50">
                 <FiStar className="h-2.5 w-2.5 fill-yellow-500 text-yellow-500" />
@@ -87,50 +94,57 @@ export default function FileCard({
             )}
           </div>
 
-          <div className="min-w-0 flex-1 pt-0.5 pr-5">
-            <p
-              className="truncate text-sm font-medium text-zinc-900 transition-colors dark:text-zinc-100"
-              title={file.name}
-            >
-              {file.name}
-            </p>
-            <div className="mt-1 flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-zinc-500 dark:text-zinc-400">
-              <span>{formatSize(file.size)}</span>
-              <span className="text-zinc-300 dark:text-zinc-700">•</span>
-              <span
-                className={`flex items-center rounded py-0.5 pr-1.5 pl-1 text-[10px] font-semibold tracking-widest uppercase ${
-                  file.isPublic
-                    ? 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300'
-                    : 'border border-zinc-200 bg-transparent text-zinc-500 dark:border-zinc-800/80 dark:text-zinc-400'
-                }`}
+          <div
+            className={`flex w-full items-start justify-between ${viewMode === 'grid' ? 'px-1 pb-1' : 'min-w-0 flex-1 pt-0.5'}`}
+          >
+            <div className="min-w-0 flex-1 pr-2">
+              <p
+                className="truncate text-sm font-medium text-zinc-900 transition-colors dark:text-zinc-100"
+                title={file.name}
               >
-                {file.isPublic ? (
-                  <FiGlobe className="mr-1 h-3 w-3" />
-                ) : (
-                  <FiLock className="mr-1 h-3 w-3" />
-                )}
-                {file.isPublic ? 'Public' : 'Private'}
-              </span>
+                {file.name}
+              </p>
+              <div className="mt-1 flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-zinc-500 dark:text-zinc-400">
+                <span>{formatSize(file.size)}</span>
+                <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                <span
+                  className={`flex items-center rounded py-0.5 pr-1.5 pl-1 text-[10px] font-semibold tracking-widest uppercase ${
+                    file.isPublic
+                      ? 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300'
+                      : 'border border-zinc-200 bg-transparent text-zinc-500 dark:border-zinc-800/80 dark:text-zinc-400'
+                  }`}
+                >
+                  {file.isPublic ? (
+                    <FiGlobe className="mr-1 h-3 w-3" />
+                  ) : (
+                    <FiLock className="mr-1 h-3 w-3" />
+                  )}
+                  {file.isPublic ? 'Public' : 'Private'}
+                </span>
+              </div>
+            </div>
+
+            <div className="relative flex shrink-0" onClick={(e) => e.stopPropagation()}>
+              <FileCardMenu
+                file={file}
+                onDelete={handleDelete}
+                onTogglePrivacy={() => onTogglePrivacy(file.id, !file.isPublic)}
+                onToggleFavorite={
+                  onToggleFavorite ? () => onToggleFavorite(file.id, !file.isFavorite) : undefined
+                }
+                onRename={
+                  onRename
+                    ? () => {
+                        setIsRenameModalOpen(true);
+                      }
+                    : undefined
+                }
+                readOnly={readOnly}
+                className="relative flex flex-col items-end"
+              />
             </div>
           </div>
         </div>
-
-        <FileCardMenu
-          file={file}
-          onDelete={handleDelete}
-          onTogglePrivacy={() => onTogglePrivacy(file.id, !file.isPublic)}
-          onToggleFavorite={
-            onToggleFavorite ? () => onToggleFavorite(file.id, !file.isFavorite) : undefined
-          }
-          onRename={
-            onRename
-              ? () => {
-                  setIsRenameModalOpen(true);
-                }
-              : undefined
-          }
-          readOnly={readOnly}
-        />
       </div>
 
       <RenameModal

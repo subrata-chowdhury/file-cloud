@@ -19,6 +19,7 @@ interface FileCardMenuProps {
   onRename?: () => void;
   onToggleFavorite?: () => void;
   readOnly?: boolean;
+  className?: string;
 }
 
 export default function FileCardMenu({
@@ -28,6 +29,7 @@ export default function FileCardMenu({
   onRename,
   onToggleFavorite,
   readOnly = false,
+  className = 'relative flex flex-col items-end',
 }: FileCardMenuProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState(false);
@@ -77,7 +79,7 @@ export default function FileCardMenu({
   };
 
   return (
-    <div className="absolute top-2 right-2 flex flex-col items-end" ref={menuRef}>
+    <div className={className} ref={menuRef}>
       <button
         onClick={handleMenuClick}
         className="relative z-10 rounded-lg p-1.5 text-zinc-400 transition-all hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
@@ -87,7 +89,7 @@ export default function FileCardMenu({
 
       {showMenu && (
         <div
-          className={`absolute right-0 z-20 w-44 overflow-hidden rounded-xl border border-zinc-200/50 bg-white/80 p-1 shadow-lg backdrop-blur-md outline-none dark:border-zinc-800/50 dark:bg-zinc-900/80 ${
+          className={`absolute right-0 z-20 min-w-44 overflow-hidden rounded-xl border border-zinc-200/50 bg-white/80 p-1 shadow-lg backdrop-blur-md outline-none dark:border-zinc-800/50 dark:bg-zinc-900/80 ${
             menuPosition === 'top'
               ? 'bottom-full mb-1 origin-bottom-right'
               : 'top-full mt-1 origin-top-right'
@@ -108,7 +110,7 @@ export default function FileCardMenu({
                   onToggleFavorite();
                   setShowMenu(false);
                 }}
-                className="flex w-full items-center rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800/50"
+                className="flex w-full items-center rounded-lg px-2.5 py-1.5 text-xs font-medium text-nowrap text-zinc-700 transition-colors hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800/50"
               >
                 <FiStar
                   className={`mr-2 h-3.5 w-3.5 ${file.isFavorite ? 'fill-yellow-500 text-yellow-500' : 'text-zinc-400'}`}

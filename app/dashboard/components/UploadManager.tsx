@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import { FiUploadCloud, FiX, FiCheckCircle, FiMinus } from 'react-icons/fi';
@@ -11,10 +11,18 @@ interface UploadManagerProps {
   children?: React.ReactNode;
 }
 
-export const UploadContext = createContext({ openUploadDialog: () => {} });
+interface UploadContextType {
+  openUploadDialog: () => void;
+}
+
+export const UploadContext = createContext<UploadContextType | undefined>(undefined);
 
 export function useUpload() {
-  return useContext(UploadContext);
+  const context = useContext(UploadContext);
+  if (context === undefined) {
+    throw new Error('useUpload must be used within an UploadManager');
+  }
+  return context;
 }
 
 interface UploadTask {
@@ -164,8 +172,10 @@ export default function UploadManager({
         )
       : 100;
 
+  const contextValue = useMemo(() => ({ openUploadDialog: open }), [open]);
+
   return (
-    <UploadContext.Provider value={{ openUploadDialog: open }}>
+    <UploadContext.Provider value={contextValue}>
       <div {...getRootProps()} className="relative flex min-h-[80vh] w-full flex-col outline-none">
         <input {...getInputProps()} />
 

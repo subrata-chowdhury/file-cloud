@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 
 type MobileMenuContextType = {
@@ -8,10 +8,7 @@ type MobileMenuContextType = {
   setIsOpen: (isOpen: boolean) => void;
 };
 
-const MobileMenuContext = createContext<MobileMenuContextType>({
-  isOpen: false,
-  setIsOpen: () => {},
-});
+const MobileMenuContext = createContext<MobileMenuContextType | undefined>(undefined);
 
 export function MobileMenuProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,13 +31,15 @@ export function MobileMenuProvider({ children }: { children: React.ReactNode }) 
     };
   }, [isOpen]);
 
-  return (
-    <MobileMenuContext.Provider value={{ isOpen, setIsOpen }}>
-      {children}
-    </MobileMenuContext.Provider>
-  );
+  const contextValue = useMemo(() => ({ isOpen, setIsOpen }), [isOpen]);
+
+  return <MobileMenuContext.Provider value={contextValue}>{children}</MobileMenuContext.Provider>;
 }
 
 export function useMobileMenu() {
-  return useContext(MobileMenuContext);
+  const context = useContext(MobileMenuContext);
+  if (context === undefined) {
+    throw new Error('useMobileMenu must be used within a MobileMenuProvider');
+  }
+  return context;
 }

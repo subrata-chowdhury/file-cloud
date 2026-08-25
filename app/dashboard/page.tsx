@@ -7,7 +7,16 @@ import UploadManager, { UploadButton } from './components/UploadManager';
 import FileCard from './components/FileCard';
 import FolderCard from './components/FolderCard';
 import FileDetailsDrawer from './components/FileDetailsDrawer';
-import { FiLoader, FiFilter, FiFolderPlus, FiChevronRight, FiHome, FiX } from 'react-icons/fi';
+import {
+  FiLoader,
+  FiFilter,
+  FiFolderPlus,
+  FiChevronRight,
+  FiHome,
+  FiX,
+  FiGrid,
+  FiList,
+} from 'react-icons/fi';
 
 interface StoredFile {
   id: string;
@@ -55,6 +64,7 @@ export default function Dashboard() {
 
   const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   const router = useRouter();
 
@@ -123,11 +133,6 @@ export default function Dashboard() {
     }
   }, [currentFolderId]);
 
-  // When filters or folder changes, reset page to 1
-  useEffect(() => {
-    setPage(1);
-  }, [type, privacy, currentFolderId]);
-
   // Fetch files whenever page or dependencies (fetchFiles) change
   useEffect(() => {
     fetchFiles(page);
@@ -191,6 +196,7 @@ export default function Dashboard() {
   const handleNavigateFolder = (folder: Folder) => {
     setCurrentFolderId(folder.id);
     setBreadcrumbs([...breadcrumbs, { id: folder.id, name: folder.name }]);
+    setPage(1);
   };
 
   const handleNavigateBreadcrumb = (index: number) => {
@@ -202,6 +208,7 @@ export default function Dashboard() {
       setCurrentFolderId(newBreadcrumbs[newBreadcrumbs.length - 1].id);
       setBreadcrumbs(newBreadcrumbs);
     }
+    setPage(1);
   };
 
   const handleDelete = async (id: string) => {
@@ -371,7 +378,10 @@ export default function Dashboard() {
                     return (
                       <button
                         key={opt.value}
-                        onClick={() => setType(opt.value)}
+                        onClick={() => {
+                          setType(opt.value);
+                          setPage(1);
+                        }}
                         className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
                           isSelected
                             ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm dark:border-white dark:bg-white dark:text-zinc-900'
@@ -404,7 +414,10 @@ export default function Dashboard() {
                     return (
                       <button
                         key={opt.value}
-                        onClick={() => setPrivacy(opt.value)}
+                        onClick={() => {
+                          setPrivacy(opt.value);
+                          setPage(1);
+                        }}
                         className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
                           isSelected
                             ? 'border-zinc-900 bg-zinc-900 text-white shadow-sm dark:border-white dark:bg-white dark:text-zinc-900'
@@ -427,16 +440,47 @@ export default function Dashboard() {
                     );
                   })}
                 </div>
+
+                <div className="hidden h-5 w-px bg-zinc-200 sm:block dark:bg-zinc-800"></div>
+
+                {/* View Toggle */}
+                <div className="flex items-center gap-1 rounded-full border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-zinc-900">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`rounded-full p-1.5 transition-all ${
+                      viewMode === 'list'
+                        ? 'bg-zinc-100 text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-white'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                    }`}
+                    title="List View"
+                  >
+                    <FiList className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`rounded-full p-1.5 transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-zinc-100 text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-white'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+                    }`}
+                    title="Grid View"
+                  >
+                    <FiGrid className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Folders Grid */}
             {folders.length > 0 && (
-              <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div
+                className={`mb-8 grid gap-4 ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}`}
+              >
                 {folders.map((folder) => (
                   <FolderCard
                     key={folder.name}
                     folder={folder}
+                    viewMode={viewMode}
                     onClick={() => handleNavigateFolder(folder)}
                     onDelete={handleDeleteFolder}
                     onToggleFavorite={handleToggleFolderFavorite}
@@ -475,11 +519,14 @@ export default function Dashboard() {
               />
             ) : files.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div
+                  className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}`}
+                >
                   {files.map((file) => (
                     <FileCard
                       key={file.id}
                       file={file}
+                      viewMode={viewMode}
                       onDelete={handleDelete}
                       onTogglePrivacy={handleTogglePrivacy}
                       onToggleFavorite={handleToggleFileFavorite}
